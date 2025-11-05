@@ -132,9 +132,17 @@ export class UptimeKumaClient {
         return;
       }
 
-      this.socket.emit("editMonitor", input, (response: { ok: boolean; msg?: string }) => {
+      this.socket.emit("editMonitor", input, async (response: { ok: boolean; msg?: string }) => {
         if (response.ok) {
-          resolve(input as Monitor);
+          // Fetch the updated monitor to return complete data
+          try {
+            const monitor = await this.getMonitor(input.id);
+            resolve(monitor);
+          } catch (error) {
+            // If fetching fails, return the input data with id
+            // This is a fallback to ensure the function still works
+            resolve({ ...input, id: input.id } as Monitor);
+          }
         } else {
           reject(new Error(`Failed to update monitor: ${response.msg || "Unknown error"}`));
         }
