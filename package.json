@@ -10,6 +10,7 @@
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node --format esm && bun run tsc --emitDeclarationOnly",
     "dev": "bun run src/index.ts",
+    "test:integration": "bun test tests/integration.test.ts",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
