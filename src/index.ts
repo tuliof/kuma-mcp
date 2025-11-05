@@ -305,14 +305,18 @@ class UptimeKumaMCPServer {
   }
 
   private async initializeClient(): Promise<void> {
-    const config = AuthConfigSchema.parse({
+    const result = AuthConfigSchema.safeParse({
       url: process.env.UPTIME_KUMA_URL,
       username: process.env.UPTIME_KUMA_USERNAME,
       password: process.env.UPTIME_KUMA_PASSWORD,
       apiKey: process.env.UPTIME_KUMA_API_KEY,
     });
 
-    this.client = new UptimeKumaClient(config);
+    if (!result.success) {
+      throw new Error(`Invalid configuration: ${result.error.message}`);
+    }
+
+    this.client = new UptimeKumaClient(result.data);
     await this.client.connect();
     await this.client.authenticate();
   }
