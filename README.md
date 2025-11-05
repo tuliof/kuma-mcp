@@ -12,35 +12,24 @@ This MCP server enables AI assistants to interact with Uptime Kuma, allowing the
 - 📋 **Monitor Information**: Get details of specific monitors or list all monitors
 - 🐳 **Docker Support**: Includes docker-compose.yml for easy Uptime Kuma deployment
 - 🏗️ **TypeScript**: Fully typed with Zod schema validation
-- ⚡ **Modern Stack**: Built with Node.js and npm (Bun.sh also supported)
+- ⚡ **Built with Bun**: Fast runtime and package manager (requires Node.js v18+ LTS)
 
 ## Installation
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) 18 or higher installed on your system
+- [Bun](https://bun.sh) installed on your system
+- Node.js v18+ LTS
 - An Uptime Kuma v2 instance (can be started with included docker-compose.yml)
-
-Note: This project also works with [Bun](https://bun.sh) if you prefer it over npm.
 
 ### Install Dependencies
 
-```bash
-npm install
-```
-
-Or with Bun:
 ```bash
 bun install
 ```
 
 ### Build
 
-```bash
-npm run build
-```
-
-Or with Bun:
 ```bash
 bun run build
 ```
@@ -78,18 +67,13 @@ export UPTIME_KUMA_API_KEY="your-api-key"
 ### 3. Run the Server
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 Or use the built version:
 
 ```bash
-node dist/index.js
-```
-
-With Bun (alternative):
-```bash
-bun run dev
+bun dist/index.js
 ```
 
 ## MCP Configuration
@@ -100,33 +84,18 @@ To use this server with an MCP client like Claude Desktop, add it to your MCP co
 
 Add to your `claude_desktop_config.json`:
 
-```json
+```jsonc
 {
   "mcpServers": {
     "kuma-mcp": {
-      "command": "node",
+      "command": "bun",
       "args": ["/path/to/kuma-mcp/dist/index.js"],
       "env": {
         "UPTIME_KUMA_URL": "http://localhost:3001",
         "UPTIME_KUMA_USERNAME": "your-username",
         "UPTIME_KUMA_PASSWORD": "your-password"
-      }
-    }
-  }
-}
-```
-
-Or with API key:
-
-```json
-{
-  "mcpServers": {
-    "kuma-mcp": {
-      "command": "node",
-      "args": ["/path/to/kuma-mcp/dist/index.js"],
-      "env": {
-        "UPTIME_KUMA_URL": "http://localhost:3001",
-        "UPTIME_KUMA_API_KEY": "your-api-key"
+        // Alternative: Use API key instead of username/password
+        // "UPTIME_KUMA_API_KEY": "your-api-key"
       }
     }
   }
@@ -262,13 +231,11 @@ kuma-mcp/
 
 ### Scripts
 
-- `npm run build` - Build the project
-- `npm run dev` - Run in development mode
-- `npm run lint` - Lint the code
-- `npm run lint:fix` - Lint and auto-fix issues
-- `npm run format` - Format code with Biome
-
-These commands also work with `bun` instead of `npm`.
+- `bun run build` - Build the project
+- `bun run dev` - Run in development mode
+- `bun run lint` - Lint the code
+- `bun run lint:fix` - Lint and auto-fix issues
+- `bun run format` - Format code with Biome
 
 ### Linting and Formatting
 
@@ -276,13 +243,13 @@ This project uses [Biome](https://biomejs.dev/) for linting and formatting:
 
 ```bash
 # Check for issues
-npm run lint
+bun run lint
 
 # Fix issues automatically
-npm run lint:fix
+bun run lint:fix
 
 # Format code
-npm run format
+bun run format
 ```
 
 ## API Reference
