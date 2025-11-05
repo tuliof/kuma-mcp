@@ -139,9 +139,8 @@ export class UptimeKumaClient {
             const monitor = await this.getMonitor(input.id);
             resolve(monitor);
           } catch (error) {
-            // If fetching fails, return the input data with id
-            // This is a fallback to ensure the function still works
-            resolve({ ...input, id: input.id } as Monitor);
+            // If fetching fails, propagate the error instead of returning potentially incomplete data
+            reject(new Error(`Failed to fetch updated monitor after edit: ${error instanceof Error ? error.message : String(error)}`));
           }
         } else {
           reject(new Error(`Failed to update monitor: ${response.msg || "Unknown error"}`));
