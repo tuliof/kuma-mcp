@@ -88,7 +88,7 @@ Add to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "kuma-mcp": {
-      "command": "bun",
+      "command": "node",
       "args": ["/path/to/kuma-mcp/dist/index.js"],
       "env": {
         "UPTIME_KUMA_URL": "http://localhost:3001",
