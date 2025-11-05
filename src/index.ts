@@ -29,6 +29,7 @@ import {
   RemoveMonitorInputSchema,
   ResumeMonitorInputSchema,
   UpdateMonitorInputSchema,
+  zodSchemaToToolInputSchema,
 } from './schemas.js'
 
 const TOOL_DEFINITIONS: Tool[] = [
@@ -36,135 +37,37 @@ const TOOL_DEFINITIONS: Tool[] = [
     name: 'add_monitor',
     description:
       'Add a new monitor to Uptime Kuma. Monitors can check various services like HTTP endpoints, ports, ping, DNS, databases, and more.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', description: 'Name of the monitor' },
-        type: {
-          type: 'string',
-          enum: [
-            'http',
-            'port',
-            'ping',
-            'keyword',
-            'grpc-keyword',
-            'json-query',
-            'dns',
-            'docker',
-            'push',
-            'steam',
-            'mqtt',
-            'kafka-producer',
-            'sqlserver',
-            'postgres',
-            'mysql',
-            'mongodb',
-            'radius',
-            'redis',
-            'group',
-            'gamedig',
-            'tailscale-ping',
-          ],
-          description: 'Type of monitor',
-        },
-        url: { type: 'string', description: 'URL to monitor (for HTTP monitors)' },
-        hostname: { type: 'string', description: 'Hostname to monitor' },
-        port: { type: 'number', description: 'Port number to monitor' },
-        interval: {
-          type: 'number',
-          description: 'Check interval in seconds (default: 60)',
-          default: 60,
-        },
-        retryInterval: { type: 'number', description: 'Retry interval in seconds' },
-        maxretries: { type: 'number', description: 'Maximum number of retries' },
-        active: {
-          type: 'boolean',
-          description: 'Whether the monitor is active (default: true)',
-          default: true,
-        },
-        timeout: { type: 'number', description: 'Timeout in seconds' },
-        method: { type: 'string', description: 'HTTP method (GET, POST, etc.)' },
-        headers: { type: 'string', description: 'HTTP headers as JSON string' },
-        body: { type: 'string', description: 'HTTP request body' },
-        keyword: { type: 'string', description: 'Keyword to search for in response' },
-        expectedStatusCode: { type: 'string', description: 'Expected HTTP status codes' },
-        ignoreTls: { type: 'boolean', description: 'Ignore TLS/SSL errors' },
-        description: { type: 'string', description: 'Monitor description' },
-      },
-      required: ['name', 'type'],
-    },
+    inputSchema: zodSchemaToToolInputSchema(AddMonitorInputSchema) as Tool['inputSchema'],
   },
   {
     name: 'update_monitor',
     description: 'Update an existing monitor in Uptime Kuma',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        id: { type: 'number', description: 'Monitor ID' },
-        name: { type: 'string', description: 'Name of the monitor' },
-        type: { type: 'string', description: 'Type of monitor' },
-        url: { type: 'string', description: 'URL to monitor' },
-        hostname: { type: 'string', description: 'Hostname to monitor' },
-        port: { type: 'number', description: 'Port number to monitor' },
-        interval: { type: 'number', description: 'Check interval in seconds' },
-        active: { type: 'boolean', description: 'Whether the monitor is active' },
-        timeout: { type: 'number', description: 'Timeout in seconds' },
-        description: { type: 'string', description: 'Monitor description' },
-      },
-      required: ['id'],
-    },
+    inputSchema: zodSchemaToToolInputSchema(UpdateMonitorInputSchema) as Tool['inputSchema'],
   },
   {
     name: 'remove_monitor',
     description: 'Remove a monitor from Uptime Kuma',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        id: { type: 'number', description: 'Monitor ID to remove' },
-      },
-      required: ['id'],
-    },
+    inputSchema: zodSchemaToToolInputSchema(RemoveMonitorInputSchema) as Tool['inputSchema'],
   },
   {
     name: 'pause_monitor',
     description: 'Pause a monitor in Uptime Kuma (stop checking)',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        id: { type: 'number', description: 'Monitor ID to pause' },
-      },
-      required: ['id'],
-    },
+    inputSchema: zodSchemaToToolInputSchema(PauseMonitorInputSchema) as Tool['inputSchema'],
   },
   {
     name: 'resume_monitor',
     description: 'Resume a paused monitor in Uptime Kuma (start checking again)',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        id: { type: 'number', description: 'Monitor ID to resume' },
-      },
-      required: ['id'],
-    },
+    inputSchema: zodSchemaToToolInputSchema(ResumeMonitorInputSchema) as Tool['inputSchema'],
   },
   {
     name: 'get_monitor',
     description: 'Get details of a specific monitor',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        id: { type: 'number', description: 'Monitor ID to retrieve' },
-      },
-      required: ['id'],
-    },
+    inputSchema: zodSchemaToToolInputSchema(GetMonitorInputSchema) as Tool['inputSchema'],
   },
   {
     name: 'list_monitors',
     description: 'List all monitors in Uptime Kuma',
-    inputSchema: {
-      type: 'object',
-      properties: {},
-    },
+    inputSchema: zodSchemaToToolInputSchema(ListMonitorsInputSchema) as Tool['inputSchema'],
   },
 ]
 
@@ -344,7 +247,7 @@ class UptimeKumaMCPServer {
         )
       }
     }
-
+TOOL_DEFINITIONS
     const transport = new StdioServerTransport()
     await this.server.connect(transport)
 
