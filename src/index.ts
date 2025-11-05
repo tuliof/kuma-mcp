@@ -1,5 +1,16 @@
 #!/usr/bin/env node
 
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      UPTIME_KUMA_URL?: string
+      UPTIME_KUMA_USERNAME?: string
+      UPTIME_KUMA_PASSWORD?: string
+      UPTIME_KUMA_API_KEY?: string
+    }
+  }
+}
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
