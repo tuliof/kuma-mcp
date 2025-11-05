@@ -8,11 +8,12 @@ This example shows how to configure and use the kuma-mcp server with Claude Desk
 docker-compose up -d
 ```
 
-Open http://localhost:3001 in your browser and complete the initial setup to create an admin user.
+Open <http://localhost:3001> in your browser and complete the initial setup to create an admin user.
 
 ## 2. Configure Claude Desktop
 
 Edit your Claude Desktop configuration file:
+
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
@@ -45,47 +46,54 @@ Restart Claude Desktop to load the new MCP server configuration.
 You can now ask Claude to interact with Uptime Kuma. Here are some example prompts:
 
 ### Add a Monitor
-```
+
+```text
 Please add a new HTTP monitor to check https://example.com every 60 seconds
 ```
 
 ### List Monitors
-```
+
+```text
 Show me all the monitors in Uptime Kuma
 ```
 
 ### Update a Monitor
-```
+
+```text
 Update monitor ID 1 to check every 120 seconds instead
 ```
 
 ### Pause a Monitor
-```
+
+```text
 Pause monitor ID 1
 ```
 
 ### Resume a Monitor
-```
+
+```text
 Resume monitor ID 1
 ```
 
 ### Get Monitor Details
-```
+
+```text
 Show me the details of monitor ID 1
 ```
 
 ### Remove a Monitor
-```
+
+```text
 Remove monitor ID 1
 ```
 
 ## Example Conversation
 
-**You**: "Can you add a monitor for my website https://mysite.com that checks every 30 seconds?"
+**You**: "Can you add a monitor for my website <https://mysite.com> that checks every 30 seconds?"
 
 **Claude**: "I'll add a monitor for your website. Let me use the add_monitor tool."
 *Claude calls the add_monitor tool with appropriate parameters*
-"I've successfully added a monitor for https://mysite.com with a 30-second check interval. The monitor ID is 1."
+"I've successfully added a monitor for <https://mysite.com> with a 30-second check interval. The monitor ID is 1."
 
 **You**: "Can you show me all my monitors?"
 
@@ -96,17 +104,20 @@ Remove monitor ID 1
 ## Troubleshooting
 
 ### Server not starting
+
 - Check that Bun is installed: `bun --version`
 - Check that Node.js v18+ LTS is installed: `node --version`
 - Verify the path in the config is correct
 - Check Claude Desktop logs for error messages
 
 ### Authentication fails
+
 - Verify your Uptime Kuma credentials are correct
 - Make sure Uptime Kuma is running and accessible
 - Check the UPTIME_KUMA_URL is correct (include http:// or https://)
 
 ### Tools not appearing
+
 - Restart Claude Desktop after configuration changes
 - Check the config file for JSON syntax errors
 - Verify the path to dist/index.js is absolute
