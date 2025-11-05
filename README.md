@@ -12,23 +12,35 @@ This MCP server enables AI assistants to interact with Uptime Kuma, allowing the
 - 📋 **Monitor Information**: Get details of specific monitors or list all monitors
 - 🐳 **Docker Support**: Includes docker-compose.yml for easy Uptime Kuma deployment
 - 🏗️ **TypeScript**: Fully typed with Zod schema validation
-- ⚡ **Bun.sh**: Fast runtime and package manager
+- ⚡ **Modern Stack**: Built with Node.js and npm (Bun.sh also supported)
 
 ## Installation
 
 ### Prerequisites
 
-- [Bun](https://bun.sh) installed on your system
+- [Node.js](https://nodejs.org/) 18 or higher installed on your system
 - An Uptime Kuma v2 instance (can be started with included docker-compose.yml)
+
+Note: This project also works with [Bun](https://bun.sh) if you prefer it over npm.
 
 ### Install Dependencies
 
+```bash
+npm install
+```
+
+Or with Bun:
 ```bash
 bun install
 ```
 
 ### Build
 
+```bash
+npm run build
+```
+
+Or with Bun:
 ```bash
 bun run build
 ```
@@ -66,13 +78,18 @@ export UPTIME_KUMA_API_KEY="your-api-key"
 ### 3. Run the Server
 
 ```bash
-bun run dev
+npm run dev
 ```
 
 Or use the built version:
 
 ```bash
 node dist/index.js
+```
+
+With Bun (alternative):
+```bash
+bun run dev
 ```
 
 ## MCP Configuration
@@ -245,11 +262,13 @@ kuma-mcp/
 
 ### Scripts
 
-- `bun run build` - Build the project
-- `bun run dev` - Run in development mode
-- `bun run lint` - Lint the code
-- `bun run lint:fix` - Lint and auto-fix issues
-- `bun run format` - Format code with Biome
+- `npm run build` - Build the project
+- `npm run dev` - Run in development mode
+- `npm run lint` - Lint the code
+- `npm run lint:fix` - Lint and auto-fix issues
+- `npm run format` - Format code with Biome
+
+These commands also work with `bun` instead of `npm`.
 
 ### Linting and Formatting
 
@@ -257,13 +276,13 @@ This project uses [Biome](https://biomejs.dev/) for linting and formatting:
 
 ```bash
 # Check for issues
-bun run lint
+npm run lint
 
 # Fix issues automatically
-bun run lint:fix
+npm run lint:fix
 
 # Format code
-bun run format
+npm run format
 ```
 
 ## API Reference
