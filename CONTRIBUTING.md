@@ -6,8 +6,8 @@ Thank you for your interest in contributing to kuma-mcp! This document provides 
 
 ### Prerequisites
 
-- Node.js 18 or higher
-- npm or Bun
+- Node.js v18+ LTS
+- Bun
 - Docker (for running Uptime Kuma locally)
 
 ### Setup
@@ -20,12 +20,12 @@ cd kuma-mcp
 
 2. Install dependencies:
 ```bash
-npm install
+bun install
 ```
 
 3. Build the project:
 ```bash
-npm run build
+bun run build
 ```
 
 ## Development Workflow
@@ -36,13 +36,13 @@ This project uses [Biome](https://biomejs.dev/) for linting and formatting.
 
 ```bash
 # Check for issues
-npm run lint
+bun run lint
 
 # Fix issues automatically
-npm run lint:fix
+bun run lint:fix
 
 # Format code
-npm run format
+bun run format
 ```
 
 All code should pass linting before being committed.
@@ -58,17 +58,15 @@ git checkout -b feature/your-feature-name
 
 3. Build and test your changes:
 ```bash
-npm run build
-npm run lint
+bun run build
+bun run lint
 ```
 
 4. Test manually with a local Uptime Kuma instance:
 ```bash
 docker-compose up -d
-export UPTIME_KUMA_URL=http://localhost:3001
-export UPTIME_KUMA_USERNAME=admin
-export UPTIME_KUMA_PASSWORD=your-password
-node dist/index.js
+source .env
+bun dist/index.js
 ```
 
 5. Commit your changes with a descriptive message:
@@ -173,8 +171,8 @@ When adding new features:
 
 ## Pull Request Process
 
-1. Ensure your code passes linting: `npm run lint`
-2. Ensure the project builds: `npm run build`
+1. Ensure your code passes linting: `bun run lint`
+2. Ensure the project builds: `bun run build`
 3. Update documentation as needed
 4. Create a pull request with a clear description of changes
 5. Reference any related issues in the PR description

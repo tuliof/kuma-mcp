@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod'
 
 // Authentication schemas
 export const AuthConfigSchema = z.object({
@@ -6,36 +6,36 @@ export const AuthConfigSchema = z.object({
   username: z.string().optional(),
   password: z.string().optional(),
   apiKey: z.string().optional(),
-});
+})
 
-export type AuthConfig = z.infer<typeof AuthConfigSchema>;
+export type AuthConfig = z.infer<typeof AuthConfigSchema>
 
 // Monitor type enum matching uptime-kuma types
 export const MonitorTypeSchema = z.enum([
-  "http",
-  "port",
-  "ping",
-  "keyword",
-  "grpc-keyword",
-  "json-query",
-  "dns",
-  "docker",
-  "push",
-  "steam",
-  "mqtt",
-  "kafka-producer",
-  "sqlserver",
-  "postgres",
-  "mysql",
-  "mongodb",
-  "radius",
-  "redis",
-  "group",
-  "gamedig",
-  "tailscale-ping",
-]);
+  'http',
+  'port',
+  'ping',
+  'keyword',
+  'grpc-keyword',
+  'json-query',
+  'dns',
+  'docker',
+  'push',
+  'steam',
+  'mqtt',
+  'kafka-producer',
+  'sqlserver',
+  'postgres',
+  'mysql',
+  'mongodb',
+  'radius',
+  'redis',
+  'group',
+  'gamedig',
+  'tailscale-ping',
+])
 
-export type MonitorType = z.infer<typeof MonitorTypeSchema>;
+export type MonitorType = z.infer<typeof MonitorTypeSchema>
 
 // Monitor configuration schema
 export const MonitorConfigSchema = z.object({
@@ -66,40 +66,40 @@ export const MonitorConfigSchema = z.object({
   description: z.string().optional(),
   parent: z.number().optional(),
   pathName: z.string().optional(),
-});
+})
 
-export type MonitorConfig = z.infer<typeof MonitorConfigSchema>;
+export type MonitorConfig = z.infer<typeof MonitorConfigSchema>
 
 // Tool input schemas
-export const AddMonitorInputSchema = MonitorConfigSchema;
+export const AddMonitorInputSchema = MonitorConfigSchema
 
 export const UpdateMonitorInputSchema = z.object({
   id: z.number(),
   ...MonitorConfigSchema.partial().shape,
-});
+})
 
 export const RemoveMonitorInputSchema = z.object({
   id: z.number(),
-});
+})
 
 export const PauseMonitorInputSchema = z.object({
   id: z.number(),
-});
+})
 
 export const ResumeMonitorInputSchema = z.object({
   id: z.number(),
-});
+})
 
 export const GetMonitorInputSchema = z.object({
   id: z.number(),
-});
+})
 
-export const ListMonitorsInputSchema = z.object({});
+export const ListMonitorsInputSchema = z.object({})
 
-export type AddMonitorInput = z.infer<typeof AddMonitorInputSchema>;
-export type UpdateMonitorInput = z.infer<typeof UpdateMonitorInputSchema>;
-export type RemoveMonitorInput = z.infer<typeof RemoveMonitorInputSchema>;
-export type PauseMonitorInput = z.infer<typeof PauseMonitorInputSchema>;
-export type ResumeMonitorInput = z.infer<typeof ResumeMonitorInputSchema>;
-export type GetMonitorInput = z.infer<typeof GetMonitorInputSchema>;
-export type ListMonitorsInput = z.infer<typeof ListMonitorsInputSchema>;
+export type AddMonitorInput = z.infer<typeof AddMonitorInputSchema>
+export type UpdateMonitorInput = z.infer<typeof UpdateMonitorInputSchema>
+export type RemoveMonitorInput = z.infer<typeof RemoveMonitorInputSchema>
+export type PauseMonitorInput = z.infer<typeof PauseMonitorInputSchema>
+export type ResumeMonitorInput = z.infer<typeof ResumeMonitorInputSchema>
+export type GetMonitorInput = z.infer<typeof GetMonitorInputSchema>
+export type ListMonitorsInput = z.infer<typeof ListMonitorsInputSchema>

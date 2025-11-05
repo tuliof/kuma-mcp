@@ -8,15 +8,15 @@
     "kuma-mcp": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "node --loader ts-node/esm src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target node --format esm && bun run tsc --emitDeclarationOnly",
+    "dev": "bun run src/index.ts",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "prepare": "npm run build"
+    "prepare": "bun run build"
   },
   "keywords": ["mcp", "uptime-kuma", "monitoring", "model-context-protocol"],
-  "author": "",
+  "author": "Tulio Fernandes",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",

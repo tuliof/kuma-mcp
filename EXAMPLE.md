@@ -22,7 +22,7 @@ Add the kuma-mcp server configuration:
 {
   "mcpServers": {
     "kuma-mcp": {
-      "command": "node",
+      "command": "bun",
       "args": ["/absolute/path/to/kuma-mcp/dist/index.js"],
       "env": {
         "UPTIME_KUMA_URL": "http://localhost:3001",
@@ -96,7 +96,8 @@ Remove monitor ID 1
 ## Troubleshooting
 
 ### Server not starting
-- Check that Node.js is installed: `node --version`
+- Check that Bun is installed: `bun --version`
+- Check that Node.js v18+ LTS is installed: `node --version`
 - Verify the path in the config is correct
 - Check Claude Desktop logs for error messages
 
@@ -121,7 +122,7 @@ If you prefer to use an API key instead of username/password:
 {
   "mcpServers": {
     "kuma-mcp": {
-      "command": "node",
+      "command": "bun",
       "args": ["/absolute/path/to/kuma-mcp/dist/index.js"],
       "env": {
         "UPTIME_KUMA_URL": "http://localhost:3001",
