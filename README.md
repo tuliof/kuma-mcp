@@ -109,6 +109,7 @@ Add to your `claude_desktop_config.json`:
 Add a new monitor to Uptime Kuma.
 
 **Parameters:**
+
 - `name` (required): Name of the monitor
 - `type` (required): Type of monitor (http, port, ping, keyword, dns, docker, push, etc.)
 - `url`: URL to monitor (for HTTP monitors)
@@ -127,6 +128,7 @@ Add a new monitor to Uptime Kuma.
 - ...and many more options
 
 **Example:**
+
 ```json
 {
   "name": "My Website",
@@ -142,10 +144,12 @@ Add a new monitor to Uptime Kuma.
 Update an existing monitor.
 
 **Parameters:**
+
 - `id` (required): Monitor ID
 - All other fields from `add_monitor` are optional
 
 **Example:**
+
 ```json
 {
   "id": 1,
@@ -159,6 +163,7 @@ Update an existing monitor.
 Remove a monitor from Uptime Kuma.
 
 **Parameters:**
+
 - `id` (required): Monitor ID to remove
 
 ### `pause_monitor`
@@ -166,6 +171,7 @@ Remove a monitor from Uptime Kuma.
 Pause a monitor (stop checking).
 
 **Parameters:**
+
 - `id` (required): Monitor ID to pause
 
 ### `resume_monitor`
@@ -173,6 +179,7 @@ Pause a monitor (stop checking).
 Resume a paused monitor (start checking again).
 
 **Parameters:**
+
 - `id` (required): Monitor ID to resume
 
 ### `get_monitor`
@@ -180,6 +187,7 @@ Resume a paused monitor (start checking again).
 Get details of a specific monitor.
 
 **Parameters:**
+
 - `id` (required): Monitor ID to retrieve
 
 ### `list_monitors`
@@ -216,7 +224,7 @@ List all monitors in Uptime Kuma.
 
 ### Project Structure
 
-```
+```bash
 kuma-mcp/
 ├── src/
 │   ├── index.ts        # Main MCP server
@@ -255,6 +263,7 @@ bun run format
 ## API Reference
 
 For more information about the Uptime Kuma API, see:
+
 - [Uptime Kuma API Documentation](https://github.com/louislam/uptime-kuma/wiki/API-Documentation)
 
 ## Contributing
