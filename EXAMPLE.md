@@ -22,7 +22,7 @@ Add the kuma-mcp server configuration:
 {
   "mcpServers": {
     "kuma-mcp": {
-      "command": "bun",
+      "command": "node",
       "args": ["/absolute/path/to/kuma-mcp/dist/index.js"],
       "env": {
         "UPTIME_KUMA_URL": "http://localhost:3001",
@@ -122,7 +122,7 @@ If you prefer to use an API key instead of username/password:
 {
   "mcpServers": {
     "kuma-mcp": {
-      "command": "bun",
+      "command": "node",
       "args": ["/absolute/path/to/kuma-mcp/dist/index.js"],
       "env": {
         "UPTIME_KUMA_URL": "http://localhost:3001",
