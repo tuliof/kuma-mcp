@@ -7,7 +7,7 @@
     "defaultBranch": "main"
   },
   "files": {
-    "ignoreUnknown": false,
+    "ignoreUnknown": true,
     "includes": ["**", "!**/node_modules", "!**/dist", "!**/.git"]
   },
   "formatter": {
@@ -16,7 +16,14 @@
     "indentWidth": 2,
     "lineWidth": 100
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "recommended": true
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {

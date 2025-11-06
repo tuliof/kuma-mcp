@@ -1,5 +1,12 @@
 import { io, type Socket } from 'socket.io-client'
-import type { AddMonitorInput, AuthConfig, MonitorConfig, UpdateMonitorInput, MonitorType } from './schemas.js'
+import type {
+  AddMonitorInput,
+  AuthConfig,
+  MonitorConfig,
+  MonitorSummary,
+  MonitorType,
+  UpdateMonitorInput,
+} from './schemas.js'
 
 interface Monitor extends MonitorConfig {
   id: number
@@ -11,117 +18,93 @@ interface LoginResponse {
   msg?: string
 }
 
+// Common fields shared across all monitor types
+const COMMON_FIELDS = [
+  'name',
+  'type',
+  'interval',
+  'retryInterval',
+  'maxretries',
+  'notificationIDList',
+  'active',
+  'description',
+  'parent',
+  'pathName',
+]
+
+// Fields for monitors with URL (HTTP-based)
+const URL_BASED_FIELDS = [
+  'url',
+  'requestTimeout',
+  'method',
+  'headers',
+  'body',
+  'upsideDown',
+  'expiryNotification',
+  'ignoreTls',
+  'maxredirects',
+  'accepted_statuscodes',
+  'ipFamily',
+  'proxyId',
+]
+
+// Fields for monitors with hostname/port
+const HOSTNAME_PORT_FIELDS = ['hostname', 'port', 'upsideDown']
+
+// Helper function to merge field arrays into a Set
+const mergeFields = (...fieldArrays: string[][]): Set<string> => {
+  return new Set(fieldArrays.flat())
+}
+
 // Define which fields are relevant for each monitor type
 const MONITOR_TYPE_FIELDS: Record<MonitorType, Set<string>> = {
-  http: new Set([
-    'name', 'type', 'url', 'interval', 'retryInterval', 'maxretries',
-    'notificationIDList', 'active', 'requestTimeout', 'method', 'headers', 'body',
-    'keyword', 'invertKeyword', 'upsideDown', 'expiryNotification', 'ignoreTls',
-    'uptimeKumaCachebuster', 'maxredirects', 'accepted_statuscodes', 'ipFamily',
-    'proxyId', 'description', 'parent', 'pathName'
+  http: mergeFields(COMMON_FIELDS, URL_BASED_FIELDS, [
+    'keyword',
+    'invertKeyword',
+    'uptimeKumaCachebuster',
   ]),
-  'json-query': new Set([
-    'name', 'type', 'url', 'interval', 'retryInterval', 'maxretries',
-    'notificationIDList', 'active', 'requestTimeout', 'method', 'headers', 'body',
-    'jsonPath', 'jsonPathOperator', 'expectedValue', 'upsideDown', 'expiryNotification',
-    'ignoreTls', 'maxredirects', 'accepted_statuscodes', 'ipFamily', 'proxyId',
-    'description', 'parent', 'pathName'
+  'json-query': mergeFields(COMMON_FIELDS, URL_BASED_FIELDS, [
+    'jsonPath',
+    'jsonPathOperator',
+    'expectedValue',
   ]),
-  keyword: new Set([
-    'name', 'type', 'url', 'interval', 'retryInterval', 'maxretries',
-    'notificationIDList', 'active', 'requestTimeout', 'method', 'headers', 'body',
-    'keyword', 'invertKeyword', 'upsideDown', 'expiryNotification', 'ignoreTls',
-    'maxredirects', 'accepted_statuscodes', 'ipFamily', 'proxyId', 'description',
-    'parent', 'pathName'
+  keyword: mergeFields(COMMON_FIELDS, URL_BASED_FIELDS, ['keyword', 'invertKeyword']),
+  'grpc-keyword': mergeFields(COMMON_FIELDS, [
+    'url',
+    'requestTimeout',
+    'keyword',
+    'invertKeyword',
+    'upsideDown',
   ]),
-  'grpc-keyword': new Set([
-    'name', 'type', 'url', 'interval', 'retryInterval', 'maxretries',
-    'notificationIDList', 'active', 'requestTimeout', 'keyword', 'invertKeyword',
-    'upsideDown', 'description', 'parent', 'pathName'
+  port: mergeFields(COMMON_FIELDS, HOSTNAME_PORT_FIELDS),
+  ping: mergeFields(COMMON_FIELDS, [
+    'hostname',
+    'upsideDown',
+    'packetSize',
+    'maxPackets',
+    'numericOutput',
+    'perPingTimeout',
   ]),
-  port: new Set([
-    'name', 'type', 'hostname', 'port', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
+  dns: mergeFields(COMMON_FIELDS, [
+    'hostname',
+    'upsideDown',
+    'dns_resolve_server',
+    'dns_resolve_type',
   ]),
-  ping: new Set([
-    'name', 'type', 'hostname', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'packetSize',
-    'maxPackets', 'numericOutput', 'perPingTimeout', 'description', 'parent', 'pathName'
-  ]),
-  dns: new Set([
-    'name', 'type', 'hostname', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'dns_resolve_server',
-    'dns_resolve_type', 'description', 'parent', 'pathName'
-  ]),
-  docker: new Set([
-    'name', 'type', 'hostname', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
-  push: new Set([
-    'name', 'type', 'interval', 'retryInterval', 'maxretries',
-    'notificationIDList', 'active', 'upsideDown', 'description', 'parent', 'pathName'
-  ]),
-  steam: new Set([
-    'name', 'type', 'hostname', 'port', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
-  mqtt: new Set([
-    'name', 'type', 'hostname', 'port', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
-  'kafka-producer': new Set([
-    'name', 'type', 'hostname', 'port', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
-  sqlserver: new Set([
-    'name', 'type', 'hostname', 'port', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
-  postgres: new Set([
-    'name', 'type', 'hostname', 'port', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
-  mysql: new Set([
-    'name', 'type', 'hostname', 'port', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
-  mongodb: new Set([
-    'name', 'type', 'hostname', 'port', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
-  radius: new Set([
-    'name', 'type', 'hostname', 'port', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
-  redis: new Set([
-    'name', 'type', 'hostname', 'port', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
-  group: new Set([
-    'name', 'type', 'interval', 'retryInterval', 'maxretries',
-    'notificationIDList', 'active', 'upsideDown', 'description', 'parent', 'pathName'
-  ]),
-  gamedig: new Set([
-    'name', 'type', 'hostname', 'port', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
-  'tailscale-ping': new Set([
-    'name', 'type', 'hostname', 'interval', 'retryInterval',
-    'maxretries', 'notificationIDList', 'active', 'upsideDown', 'description',
-    'parent', 'pathName'
-  ]),
+  docker: mergeFields(COMMON_FIELDS, ['hostname', 'upsideDown']),
+  push: mergeFields(COMMON_FIELDS, ['upsideDown']),
+  steam: mergeFields(COMMON_FIELDS, HOSTNAME_PORT_FIELDS),
+  mqtt: mergeFields(COMMON_FIELDS, HOSTNAME_PORT_FIELDS),
+  'kafka-producer': mergeFields(COMMON_FIELDS, HOSTNAME_PORT_FIELDS),
+  sqlserver: mergeFields(COMMON_FIELDS, HOSTNAME_PORT_FIELDS),
+  postgres: mergeFields(COMMON_FIELDS, HOSTNAME_PORT_FIELDS),
+  mysql: mergeFields(COMMON_FIELDS, HOSTNAME_PORT_FIELDS),
+  mongodb: mergeFields(COMMON_FIELDS, HOSTNAME_PORT_FIELDS),
+  radius: mergeFields(COMMON_FIELDS, HOSTNAME_PORT_FIELDS),
+  redis: mergeFields(COMMON_FIELDS, HOSTNAME_PORT_FIELDS),
+  group: mergeFields(COMMON_FIELDS, ['upsideDown']),
+  gamedig: mergeFields(COMMON_FIELDS, HOSTNAME_PORT_FIELDS),
+  'tailscale-ping': mergeFields(COMMON_FIELDS, ['hostname', 'upsideDown']),
 }
 
 /**
@@ -195,7 +178,7 @@ export class UptimeKumaClient {
       })
 
       this.socket.on('connect_error', (error) => {
-        reject(new Error(`Connection failed: ${error.message}`))
+        reject(`Connection failed: ${error.message}`)
       })
 
       this.socket.on('disconnect', () => {
@@ -215,19 +198,19 @@ export class UptimeKumaClient {
 
     return new Promise((resolve, reject) => {
       if (!this.socket) {
-        reject(new Error('Socket not connected'))
+        reject('Socket not connected')
         return
       }
 
       if (this.config.apiKey) {
         // Authenticate with API key
         this.socket.emit('loginByToken', this.config.apiKey, (response: LoginResponse) => {
-          if (response.ok) {
-            this.authenticated = true
-            resolve()
-          } else {
-            reject(new Error(`Authentication failed: ${response.msg || 'Unknown error'}`))
+          if (!response.ok) {
+            reject(`Authentication failed: ${response.msg || 'Unknown error'}`)
+            return
           }
+          this.authenticated = true
+          resolve()
         })
       } else if (this.config.username && this.config.password) {
         // Authenticate with username/password
@@ -238,16 +221,16 @@ export class UptimeKumaClient {
             password: this.config.password,
           },
           (response: LoginResponse) => {
-            if (response.ok) {
-              this.authenticated = true
-              resolve()
-            } else {
-              reject(new Error(`Authentication failed: ${response.msg || 'Unknown error'}`))
+            if (!response.ok) {
+              reject(`Authentication failed: ${response.msg || 'Unknown error'}`)
+              return
             }
+            this.authenticated = true
+            resolve()
           },
         )
       } else {
-        reject(new Error('No authentication credentials provided'))
+        reject('No authentication credentials provided')
       }
     })
   }
@@ -263,7 +246,7 @@ export class UptimeKumaClient {
 
     return new Promise((resolve, reject) => {
       if (!this.socket) {
-        reject(new Error('Socket not connected'))
+        reject('Socket not connected')
         return
       }
 
@@ -273,122 +256,120 @@ export class UptimeKumaClient {
         'add',
         payload,
         (response: { ok: boolean; msg?: string; monitorID?: number }) => {
-          if (response.ok && response.monitorID) {
-            resolve({ ...monitor, id: response.monitorID })
-          } else {
-            reject(new Error(`Failed to add monitor: ${response.msg || 'Unknown error'}`))
+          if (!response.ok || !response.monitorID) {
+            reject(`Failed to add monitor: ${response.msg || 'Unknown error'}`)
+            return
           }
+          resolve({ ...monitor, id: response.monitorID })
         },
       )
     })
   }
 
-  async updateMonitor(input: UpdateMonitorInput): Promise<Monitor> {
+  async updateMonitorById(input: UpdateMonitorInput): Promise<Monitor> {
     await this.ensureAuthenticated()
 
-    return new Promise(async (resolve, reject) => {
+    if (!this.socket) {
+      throw 'Socket not connected'
+    }
+
+    // Fetch the existing monitor to get all current fields
+    const existingMonitor = await this.getMonitorById(input.id)
+
+    // Merge the update with existing monitor data
+    const payload = {
+      ...existingMonitor,
+      ...transformMonitorPayload(input),
+    }
+
+    return new Promise((resolve, reject) => {
       if (!this.socket) {
-        reject(new Error('Socket not connected'))
+        reject('Socket not connected')
         return
       }
 
-      try {
-        // Fetch the existing monitor to get all current fields
-        const existingMonitor = await this.getMonitor(input.id)
-
-        // Merge the update with existing monitor data
-        const payload = {
-          ...existingMonitor,
-          ...transformMonitorPayload(input),
+      this.socket.emit('editMonitor', payload, async (response: { ok: boolean; msg?: string }) => {
+        if (!response.ok) {
+          reject(`Failed to update monitor: ${response.msg || 'Unknown error'}`)
+          return
         }
 
-        this.socket.emit('editMonitor', payload, async (response: { ok: boolean; msg?: string }) => {
-          if (response.ok) {
-            // Fetch the updated monitor to return complete data
-            try {
-              const monitor = await this.getMonitor(input.id)
-              resolve(monitor)
-            } catch (error) {
-              // If fetching fails, propagate the error instead of returning potentially incomplete data
-              reject(
-                new Error(
-                  `Failed to fetch updated monitor after edit: ${error instanceof Error ? error.message : String(error)}`,
-                ),
-              )
-            }
-          } else {
-            reject(new Error(`Failed to update monitor: ${response.msg || 'Unknown error'}`))
-          }
-        })
-      } catch (error) {
-        reject(new Error(`Failed to fetch existing monitor: ${error instanceof Error ? error.message : String(error)}`))
-      }
+        // Fetch the updated monitor to return complete data
+        try {
+          const monitor = await this.getMonitorById(input.id)
+          resolve(monitor)
+        } catch (error) {
+          reject(
+            `Failed to fetch updated monitor after edit: ${error instanceof Error ? error.message : String(error)}`,
+          )
+        }
+      })
     })
   }
 
-  async removeMonitor(id: number): Promise<void> {
+  async removeMonitorById(id: number): Promise<void> {
     await this.ensureAuthenticated()
 
     return new Promise((resolve, reject) => {
       if (!this.socket) {
-        reject(new Error('Socket not connected'))
+        reject('Socket not connected')
         return
       }
 
       this.socket.emit('deleteMonitor', id, (response: { ok: boolean; msg?: string }) => {
-        if (response.ok) {
-          resolve()
-        } else {
-          reject(new Error(`Failed to remove monitor: ${response.msg || 'Unknown error'}`))
+        if (!response.ok) {
+          reject(`Failed to remove monitor: ${response.msg || 'Unknown error'}`)
+          return
         }
+        resolve()
       })
     })
   }
 
-  async pauseMonitor(id: number): Promise<void> {
+  async pauseMonitorById(id: number): Promise<void> {
     await this.ensureAuthenticated()
 
     return new Promise((resolve, reject) => {
       if (!this.socket) {
-        reject(new Error('Socket not connected'))
+        reject('Socket not connected')
         return
       }
 
       this.socket.emit('pauseMonitor', id, (response: { ok: boolean; msg?: string }) => {
-        if (response.ok) {
-          resolve()
-        } else {
-          reject(new Error(`Failed to pause monitor: ${response.msg || 'Unknown error'}`))
+        if (!response.ok) {
+          reject(`Failed to pause monitor: ${response.msg || 'Unknown error'}`)
+          return
         }
+        resolve()
       })
     })
   }
 
-  async resumeMonitor(id: number): Promise<void> {
+  async resumeMonitorById(id: number): Promise<void> {
     await this.ensureAuthenticated()
 
     return new Promise((resolve, reject) => {
       if (!this.socket) {
-        reject(new Error('Socket not connected'))
+        reject('Socket not connected')
         return
       }
 
       this.socket.emit('resumeMonitor', id, (response: { ok: boolean; msg?: string }) => {
-        if (response.ok) {
-          resolve()
-        } else {
-          reject(new Error(`Failed to resume monitor: ${response.msg || 'Unknown error'}`))
+        if (!response.ok) {
+          reject(`Failed to resume monitor: ${response.msg || 'Unknown error'}`)
+          return
         }
+        resolve()
       })
     })
   }
 
-  async getMonitor(id: number): Promise<Monitor> {
+  async getMonitorById(id: number): Promise<Monitor> {
     await this.ensureAuthenticated()
 
     return new Promise((resolve, reject) => {
       if (!this.socket) {
-        reject(new Error('Socket not connected'))
+        reject('Socket not connected')
         return
       }
 
@@ -396,11 +377,11 @@ export class UptimeKumaClient {
         'getMonitor',
         id,
         (response: { ok: boolean; monitor?: Monitor; msg?: string }) => {
-          if (response.ok && response.monitor) {
-            resolve(response.monitor)
-          } else {
-            reject(new Error(`Failed to get monitor: ${response.msg || 'Unknown error'}`))
+          if (!response.ok || !response.monitor) {
+            reject(`Failed to get monitor: ${response.msg || 'Unknown error'}`)
+            return
           }
+          resolve(response.monitor)
         },
       )
     })
@@ -411,7 +392,7 @@ export class UptimeKumaClient {
 
     return new Promise((resolve, reject) => {
       if (!this.socket) {
-        reject(new Error('Socket not connected'))
+        reject('Socket not connected')
         return
       }
 
@@ -427,16 +408,56 @@ export class UptimeKumaClient {
       this.socket.emit('getMonitorList', (response: { ok: boolean; msg?: string }) => {
         if (!response.ok) {
           this.socket?.off('monitorList', handleMonitorList)
-          reject(new Error(`Failed to request monitors: ${response.msg || 'Unknown error'}`))
+          reject(`Failed to request monitors: ${response.msg || 'Unknown error'}`)
         }
       })
 
       // Add a timeout in case the event never arrives
       setTimeout(() => {
         this.socket?.off('monitorList', handleMonitorList)
-        reject(new Error('Timeout waiting for monitor list'))
+        reject('Timeout waiting for monitor list')
       }, 10000)
     })
+  }
+
+  async findMonitorsByName(
+    searchTerm: string,
+    useRegex: boolean = false,
+  ): Promise<MonitorSummary[]> {
+    await this.ensureAuthenticated()
+
+    const monitors = await this.listMonitors()
+
+    let matchingMonitors: Monitor[]
+
+    if (useRegex) {
+      // Use regex pattern matching
+      try {
+        const regex = new RegExp(searchTerm, 'i') // Case-insensitive by default
+        matchingMonitors = monitors.filter((monitor) => regex.test(monitor.name))
+      } catch (error) {
+        throw `Invalid regular expression pattern: ${error instanceof Error ? error.message : String(error)}`
+      }
+    } else {
+      // Search for monitors matching the name (case-insensitive partial match)
+      const searchLower = searchTerm.toLowerCase()
+      matchingMonitors = monitors.filter((monitor) =>
+        monitor.name.toLowerCase().includes(searchLower),
+      )
+    }
+
+    // Return only the requested fields
+    return matchingMonitors.map((monitor) => ({
+      id: monitor.id,
+      name: monitor.name,
+      url: monitor.url,
+      description: monitor.description,
+      type: monitor.type,
+      pathName: monitor.pathName,
+      hostname: monitor.hostname,
+      port: monitor.port,
+      active: monitor.active,
+    }))
   }
 
   async disconnect(): Promise<void> {

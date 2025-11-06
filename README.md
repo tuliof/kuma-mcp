@@ -44,24 +44,14 @@ If you don't have an Uptime Kuma instance running, use the included docker-compo
 docker-compose up -d
 ```
 
-Uptime Kuma will be available at `http://localhost:3001`
+Uptime Kuma will be available at `http://localhost:3001`. Go to the URL and finish the uptime-kuma configuration.
 
 ### 2. Configure Environment Variables
 
-Set the following environment variables:
+Set the credentials in `.env`:
 
 ```bash
-# Required
-export UPTIME_KUMA_URL="http://localhost:3001"
-
-# Authentication (choose one method)
-
-# Method 1: Username and Password
-export UPTIME_KUMA_USERNAME="your-username"
-export UPTIME_KUMA_PASSWORD="your-password"
-
-# Method 2: API Key
-export UPTIME_KUMA_API_KEY="your-api-key"
+cp .env.example .env
 ```
 
 ### 3. Run the Server
@@ -73,8 +63,53 @@ bun run dev
 Or use the built version:
 
 ```bash
+bun run build
 bun dist/index.js
 ```
+
+## Testing with MCP Inspector
+
+The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is a visual tool for testing and debugging MCP servers. It provides an interactive interface to explore your server's capabilities, test tools, and inspect responses.
+
+### Run with Inspector
+
+Start your MCP server with the Inspector:
+
+```bash
+bunx @modelcontextprotocol/inspector bun run dev
+```
+
+or the built version
+
+```bash
+bun run build
+bunx @modelcontextprotocol/inspector bun run dist/index.js
+```
+
+The Inspector will:
+
+1. Start your MCP server
+2. Open a web interface (typically at `http://localhost:6274`)
+3. Allow you to interactively test all available tools
+4. Display real-time request/response data
+5. Help debug issues with your server
+
+### Using the Inspector
+
+Once the Inspector is running:
+
+1. **Connect to Server**: The Inspector automatically connects to your MCP server
+2. **Browse Tools**: View all available tools (`add_monitor`, `list_monitors`, etc.)
+3. **Test Tools**: Fill in parameters and execute tools to see responses
+4. **Inspect Results**: View detailed request/response JSON
+5. **Debug Issues**: Check for errors and validation problems
+
+This is especially useful for:
+
+- Testing monitor creation with different configurations
+- Verifying authentication is working correctly
+- Exploring the response format of each tool
+- Debugging issues before integrating with Claude Desktop or other MCP clients
 
 ## MCP Configuration
 
@@ -104,167 +139,21 @@ Add to your `claude_desktop_config.json`:
 
 ## Available Tools
 
-### `add_monitor`
+- `add_monitor`
+- `update_monitor`
+- `remove_monitor`
+- `pause_monitor`
+- `resume_monitor`
+- `get_monitor`
+- `list_monitors`
 
-Add a new monitor to Uptime Kuma.
-
-**Parameters:**
-
-- `name` (required): Name of the monitor
-- `type` (required): Type of monitor (http, port, ping, keyword, dns, docker, push, etc.)
-- `url`: URL to monitor (for HTTP monitors)
-- `hostname`: Hostname to monitor
-- `port`: Port number to monitor
-- `interval`: Check interval in seconds (default: 60)
-- `active`: Whether the monitor is active (default: true)
-- `timeout`: Timeout in seconds
-- `method`: HTTP method (GET, POST, etc.)
-- `headers`: HTTP headers as JSON string
-- `body`: HTTP request body
-- `keyword`: Keyword to search for in response
-- `expectedStatusCode`: Expected HTTP status codes
-- `ignoreTls`: Ignore TLS/SSL errors
-- `description`: Monitor description
-- ...and many more options
-
-**Example:**
-
-```json
-{
-  "name": "My Website",
-  "type": "http",
-  "url": "https://example.com",
-  "interval": 60,
-  "active": true
-}
-```
-
-### `update_monitor`
-
-Update an existing monitor.
-
-**Parameters:**
-
-- `id` (required): Monitor ID
-- All other fields from `add_monitor` are optional
-
-**Example:**
-
-```json
-{
-  "id": 1,
-  "interval": 120,
-  "active": false
-}
-```
-
-### `remove_monitor`
-
-Remove a monitor from Uptime Kuma.
-
-**Parameters:**
-
-- `id` (required): Monitor ID to remove
-
-### `pause_monitor`
-
-Pause a monitor (stop checking).
-
-**Parameters:**
-
-- `id` (required): Monitor ID to pause
-
-### `resume_monitor`
-
-Resume a paused monitor (start checking again).
-
-**Parameters:**
-
-- `id` (required): Monitor ID to resume
-
-### `get_monitor`
-
-Get details of a specific monitor.
-
-**Parameters:**
-
-- `id` (required): Monitor ID to retrieve
-
-### `list_monitors`
-
-List all monitors in Uptime Kuma.
-
-**Parameters:** None
-
-## Supported Monitor Types
-
-- `http` - HTTP(s) monitoring
-- `port` - TCP port monitoring
-- `ping` - Ping/ICMP monitoring
-- `keyword` - Keyword search in HTTP response
-- `grpc-keyword` - gRPC keyword monitoring
-- `json-query` - JSON query monitoring
-- `dns` - DNS monitoring
-- `docker` - Docker container monitoring
-- `push` - Push monitoring
-- `steam` - Steam game server
-- `mqtt` - MQTT monitoring
-- `kafka-producer` - Kafka producer
-- `sqlserver` - SQL Server database
-- `postgres` - PostgreSQL database
-- `mysql` - MySQL database
-- `mongodb` - MongoDB database
-- `radius` - RADIUS server
-- `redis` - Redis database
-- `group` - Monitor group
-- `gamedig` - Game server (via GameDig)
-- `tailscale-ping` - Tailscale ping
-
-## Development
-
-### Project Structure
-
-```bash
-kuma-mcp/
-├── src/
-│   ├── index.ts        # Main MCP server
-│   ├── client.ts       # Uptime Kuma client implementation
-│   └── schemas.ts      # Zod schemas for validation
-├── dist/               # Compiled output
-├── docker-compose.yml  # Uptime Kuma docker setup
-├── package.json
-├── tsconfig.json
-└── biome.json
-```
-
-### Scripts
-
-- `bun run build` - Build the project
-- `bun run dev` - Run in development mode
-- `bun run lint` - Lint the code
-- `bun run lint:fix` - Lint and auto-fix issues
-- `bun run format` - Format code with Biome
-
-### Linting and Formatting
-
-This project uses [Biome](https://biomejs.dev/) for linting and formatting:
-
-```bash
-# Check for issues
-bun run lint
-
-# Fix issues automatically
-bun run lint:fix
-
-# Format code
-bun run format
-```
 
 ## API Reference
 
 For more information about the Uptime Kuma API, see:
 
 - [Uptime Kuma API Documentation](https://github.com/louislam/uptime-kuma/wiki/API-Documentation)
+- [uptime-kuma-api - A Python wrapper for the Uptime Kuma Socket.IO API](https://github.com/lucasheld/uptime-kuma-api)
 
 ## Contributing
 

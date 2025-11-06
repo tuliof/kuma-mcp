@@ -35,6 +35,6 @@
     "sourceMap": true,
     "types": ["node"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "tests/helpers.ts"],
   "exclude": ["node_modules", "dist"]
 }
