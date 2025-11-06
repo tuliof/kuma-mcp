@@ -1,17 +1,6 @@
 #!/usr/bin/env node
 
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      UPTIME_KUMA_URL?: string
-      UPTIME_KUMA_USERNAME?: string
-      UPTIME_KUMA_PASSWORD?: string
-      UPTIME_KUMA_API_KEY?: string
-    }
-  }
-}
-
-import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { Server } from '@modelcontextprotocol/sdk/server'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   type CallToolRequest,
@@ -19,10 +8,12 @@ import {
   ListToolsRequestSchema,
   type Tool,
 } from '@modelcontextprotocol/sdk/types.js'
-import { UptimeKumaClient } from './client.js'
+import { UptimeKumaClient } from './client'
+import { env } from './env'
 import {
   AddMonitorInputSchema,
   AuthConfigSchema,
+  FindMonitorsByNameInputSchema,
   GetMonitorInputSchema,
   ListMonitorsInputSchema,
   PauseMonitorInputSchema,
@@ -30,7 +21,7 @@ import {
   ResumeMonitorInputSchema,
   UpdateMonitorInputSchema,
   zodSchemaToToolInputSchema,
-} from './schemas.js'
+} from './schemas'
 
 const TOOL_DEFINITIONS: Tool[] = [
   {
@@ -40,29 +31,35 @@ const TOOL_DEFINITIONS: Tool[] = [
     inputSchema: zodSchemaToToolInputSchema(AddMonitorInputSchema) as Tool['inputSchema'],
   },
   {
-    name: 'update_monitor',
-    description: 'Update an existing monitor in Uptime Kuma',
+    name: 'update_monitor_by_id',
+    description: 'Update an existing monitor in Uptime Kuma using its ID',
     inputSchema: zodSchemaToToolInputSchema(UpdateMonitorInputSchema) as Tool['inputSchema'],
   },
   {
-    name: 'remove_monitor',
-    description: 'Remove a monitor from Uptime Kuma',
+    name: 'remove_monitor_by_id',
+    description: 'Remove a monitor from Uptime Kuma using its ID',
     inputSchema: zodSchemaToToolInputSchema(RemoveMonitorInputSchema) as Tool['inputSchema'],
   },
   {
-    name: 'pause_monitor',
-    description: 'Pause a monitor in Uptime Kuma (stop checking)',
+    name: 'pause_monitor_by_id',
+    description: 'Pause a monitor in Uptime Kuma (stop checking) using its ID',
     inputSchema: zodSchemaToToolInputSchema(PauseMonitorInputSchema) as Tool['inputSchema'],
   },
   {
-    name: 'resume_monitor',
-    description: 'Resume a paused monitor in Uptime Kuma (start checking again)',
+    name: 'resume_monitor_by_id',
+    description: 'Resume a paused monitor in Uptime Kuma (start checking again) using its ID',
     inputSchema: zodSchemaToToolInputSchema(ResumeMonitorInputSchema) as Tool['inputSchema'],
   },
   {
-    name: 'get_monitor',
-    description: 'Get details of a specific monitor',
+    name: 'get_monitor_by_id',
+    description: 'Get details of a specific monitor using its ID',
     inputSchema: zodSchemaToToolInputSchema(GetMonitorInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'find_monitors_by_name',
+    description:
+      'Find monitors by name or partial name. Returns a list of matching monitors with id, name, url, description, type, path, hostname, port, and active status.',
+    inputSchema: zodSchemaToToolInputSchema(FindMonitorsByNameInputSchema) as Tool['inputSchema'],
   },
   {
     name: 'list_monitors',
@@ -122,9 +119,9 @@ class UptimeKumaMCPServer {
             }
           }
 
-          case 'update_monitor': {
+          case 'update_monitor_by_id': {
             const input = UpdateMonitorInputSchema.parse(request.params.arguments)
-            const monitor = await this.client.updateMonitor(input)
+            const monitor = await this.client.updateMonitorById(input)
             return {
               content: [
                 {
@@ -135,9 +132,9 @@ class UptimeKumaMCPServer {
             }
           }
 
-          case 'remove_monitor': {
+          case 'remove_monitor_by_id': {
             const input = RemoveMonitorInputSchema.parse(request.params.arguments)
-            await this.client.removeMonitor(input.id)
+            await this.client.removeMonitorById(input.id)
             return {
               content: [
                 {
@@ -148,9 +145,9 @@ class UptimeKumaMCPServer {
             }
           }
 
-          case 'pause_monitor': {
+          case 'pause_monitor_by_id': {
             const input = PauseMonitorInputSchema.parse(request.params.arguments)
-            await this.client.pauseMonitor(input.id)
+            await this.client.pauseMonitorById(input.id)
             return {
               content: [
                 {
@@ -161,9 +158,9 @@ class UptimeKumaMCPServer {
             }
           }
 
-          case 'resume_monitor': {
+          case 'resume_monitor_by_id': {
             const input = ResumeMonitorInputSchema.parse(request.params.arguments)
-            await this.client.resumeMonitor(input.id)
+            await this.client.resumeMonitorById(input.id)
             return {
               content: [
                 {
@@ -174,14 +171,27 @@ class UptimeKumaMCPServer {
             }
           }
 
-          case 'get_monitor': {
+          case 'get_monitor_by_id': {
             const input = GetMonitorInputSchema.parse(request.params.arguments)
-            const monitor = await this.client.getMonitor(input.id)
+            const monitor = await this.client.getMonitorById(input.id)
             return {
               content: [
                 {
                   type: 'text',
                   text: JSON.stringify(monitor, null, 2),
+                },
+              ],
+            }
+          }
+
+          case 'find_monitors_by_name': {
+            const input = FindMonitorsByNameInputSchema.parse(request.params.arguments)
+            const monitors = await this.client.findMonitorsByName(input.searchTerm, input.useRegex)
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(monitors, null, 2),
                 },
               ],
             }
@@ -220,10 +230,10 @@ class UptimeKumaMCPServer {
 
   private async initializeClient(): Promise<void> {
     const result = AuthConfigSchema.safeParse({
-      url: process.env.UPTIME_KUMA_URL,
-      username: process.env.UPTIME_KUMA_USERNAME,
-      password: process.env.UPTIME_KUMA_PASSWORD,
-      apiKey: process.env.UPTIME_KUMA_API_KEY,
+      url: env.UPTIME_KUMA_URL,
+      username: env.UPTIME_KUMA_USERNAME,
+      password: env.UPTIME_KUMA_PASSWORD,
+      apiKey: env.UPTIME_KUMA_API_KEY,
     })
 
     if (!result.success) {
@@ -237,7 +247,7 @@ class UptimeKumaMCPServer {
 
   async run(): Promise<void> {
     // Initialize client if credentials are provided
-    if (process.env.UPTIME_KUMA_URL) {
+    if (env.UPTIME_KUMA_URL) {
       try {
         await this.initializeClient()
       } catch (error) {
@@ -247,7 +257,7 @@ class UptimeKumaMCPServer {
         )
       }
     }
-TOOL_DEFINITIONS
+    TOOL_DEFINITIONS
     const transport = new StdioServerTransport()
     await this.server.connect(transport)
 
