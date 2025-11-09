@@ -111,8 +111,10 @@ const MONITOR_TYPE_FIELDS: Record<MonitorType, Set<string>> = {
  * Transform and filter monitor payload to match Uptime Kuma's expected format
  * Only includes fields relevant to the specific monitor type
  */
-function transformMonitorPayload(input: AddMonitorInput | UpdateMonitorInput): Record<string, any> {
-  const payload: Record<string, any> = {}
+function transformMonitorPayload(
+  input: AddMonitorInput | UpdateMonitorInput,
+): Record<string, unknown> {
+  const payload: Record<string, unknown> = {}
 
   // If we have a type, use it to filter fields
   if (input.type) {
@@ -152,6 +154,9 @@ function transformMonitorPayload(input: AddMonitorInput | UpdateMonitorInput): R
   return payload
 }
 
+/**
+ * Client for interacting with Uptime Kuma API via Socket.IO
+ */
 export class UptimeKumaClient {
   private socket: Socket | null = null
   private config: AuthConfig
