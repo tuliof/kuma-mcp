@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
-import { UptimeKumaClient } from '../src/client'
+import { UptimeKumaClient } from '../src/api'
 import { env } from '../src/env'
 import type { AddMonitorInput } from '../src/schemas'
 import { cleanupAllMonitors, waitForUptimeKuma } from './helpers'
