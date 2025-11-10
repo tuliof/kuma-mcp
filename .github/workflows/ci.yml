@@ -36,8 +36,8 @@ jobs:
           cat > .env.test << EOF
           UPTIME_KUMA_PORT=4001
           UPTIME_KUMA_URL=http://localhost:4001
-          UPTIME_KUMA_USERNAME=admin
-          UPTIME_KUMA_PASSWORD=admin123
+          UPTIME_KUMA_USERNAME=${{ secrets.UPTIME_KUMA_USERNAME }}
+          UPTIME_KUMA_PASSWORD=${{ secrets.UPTIME_KUMA_PASSWORD }}
           EOF
 
       - name: Run integration tests
