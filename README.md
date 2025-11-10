@@ -159,6 +159,8 @@ For more information about the Uptime Kuma API, see:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+This project uses [Semantic Commit Messages](https://www.conventionalcommits.org/). See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
 ## License
 
 MIT
