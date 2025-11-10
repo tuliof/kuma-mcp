@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-build-test:
+    name: Lint, Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run linter
+        run: bun run lint
+
+      - name: Build project
+        run: bun run build
+
+      - name: Setup test environment
+        run: |
+          cat > .env.test << EOF
+          UPTIME_KUMA_PORT=4001
+          UPTIME_KUMA_URL=http://localhost:4001
+          UPTIME_KUMA_USERNAME=admin
+          UPTIME_KUMA_PASSWORD=admin123
+          EOF
+
+      - name: Run integration tests
+        run: bun run test:integration
