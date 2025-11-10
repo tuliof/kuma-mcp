@@ -28,6 +28,13 @@ bun install
 bun run build
 ```
 
+4. Install git hooks (recommended):
+```bash
+./scripts/install-hooks.sh
+```
+
+This installs a pre-commit hook that enforces semantic commit messages.
+
 ## Development Workflow
 
 ### Code Style
@@ -76,12 +83,54 @@ git commit -m "Add: Description of your changes"
 
 ### Commit Message Format
 
-Use clear, descriptive commit messages:
-- `Add: [feature]` - New features
-- `Fix: [issue]` - Bug fixes
-- `Update: [component]` - Updates to existing features
-- `Docs: [section]` - Documentation changes
-- `Refactor: [component]` - Code refactoring
+This project enforces [Semantic Commit Messages](https://www.conventionalcommits.org/) to maintain a clear and consistent commit history.
+
+#### Format
+
+```
+<type>(<scope>): <subject>
+```
+
+- `<type>`: The type of change (required)
+- `<scope>`: The area of the codebase affected (optional)
+- `<subject>`: A brief description in present tense (required)
+
+#### Allowed Types
+
+- `feat`: New feature for the user
+- `fix`: Bug fix for the user
+- `docs`: Documentation changes
+- `style`: Formatting, missing semicolons, etc. (no production code change)
+- `refactor`: Refactoring production code (e.g., renaming a variable)
+- `test`: Adding or updating tests (no production code change)
+- `chore`: Updating build tasks, package manager configs, etc. (no production code change)
+
+#### Examples
+
+```bash
+feat: add hat wobble
+feat(api): add new endpoint for monitors
+fix(ui): resolve button styling issue
+docs: update installation instructions
+style: format code with biome
+refactor(client): simplify authentication logic
+test: add unit tests for monitor validation
+chore: update dependencies
+```
+
+#### Installing the Git Hook
+
+To automatically enforce this format, install the git hooks:
+
+```bash
+./scripts/install-hooks.sh
+```
+
+This will install a `commit-msg` hook that validates your commit messages before they are created.
+
+#### Manual Validation
+
+If you prefer not to use the git hook, ensure your commit messages follow the format above.
 
 ## Adding New Features
 
