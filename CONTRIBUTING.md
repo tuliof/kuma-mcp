@@ -86,7 +86,7 @@ All code should pass linting before being committed.
 1. Commit your changes with a descriptive message:
 
     ```bash
-    git commit -m "Add: Description of your changes"
+    git commit -m "feat: add description of your changes"
     ```
 
 ### Commit Message Format
