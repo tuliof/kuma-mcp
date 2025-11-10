@@ -37,7 +37,7 @@ Thank you for your interest in contributing to kuma-mcp! This document provides 
     ./scripts/install-hooks.sh
     ```
 
-This installs a pre-commit hook that enforces semantic commit messages.
+This installs a commit-msg hook that enforces semantic commit messages.
 
 ## Development Workflow
 
