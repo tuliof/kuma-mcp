@@ -13,25 +13,29 @@ Thank you for your interest in contributing to kuma-mcp! This document provides 
 ### Setup
 
 1. Clone the repository:
-```bash
-git clone https://github.com/tuliof/kuma-mcp.git
-cd kuma-mcp
-```
 
-2. Install dependencies:
-```bash
-bun install
-```
+    ```bash
+    git clone https://github.com/tuliof/kuma-mcp.git
+    cd kuma-mcp
+    ```
 
-3. Build the project:
-```bash
-bun run build
-```
+1. Install dependencies:
 
-4. Install git hooks (recommended):
-```bash
-./scripts/install-hooks.sh
-```
+    ```bash
+    bun install
+    ```
+
+1. Build the project:
+
+    ```bash
+    bun run build
+    ```
+
+1. Install git hooks (recommended):
+
+    ```bash
+    ./scripts/install-hooks.sh
+    ```
 
 This installs a pre-commit hook that enforces semantic commit messages.
 
@@ -57,29 +61,33 @@ All code should pass linting before being committed.
 ### Making Changes
 
 1. Create a new branch for your feature or fix:
-```bash
-git checkout -b feature/your-feature-name
-```
 
-2. Make your changes in the `src/` directory
+    ```bash
+    git checkout -b feature/your-feature-name
+    ```
 
-3. Build and test your changes:
-```bash
-bun run build
-bun run lint
-```
+1. Make your changes in the `src/` directory
 
-4. Test manually with a local Uptime Kuma instance:
-```bash
-docker-compose up -d
-source .env
-bun dist/index.js
-```
+1. Build and test your changes:
 
-5. Commit your changes with a descriptive message:
-```bash
-git commit -m "Add: Description of your changes"
-```
+    ```bash
+    bun run build
+    bun run lint
+    ```
+
+1. Test manually with a local Uptime Kuma instance:
+
+    ```bash
+    docker-compose up -d
+    source .env
+    bun dist/index.js
+    ```
+
+1. Commit your changes with a descriptive message:
+
+    ```bash
+    git commit -m "Add: Description of your changes"
+    ```
 
 ### Commit Message Format
 
@@ -87,7 +95,7 @@ This project enforces [Semantic Commit Messages](https://www.conventionalcommits
 
 #### Format
 
-```
+```text
 <type>(<scope>): <subject>
 ```
 
@@ -139,57 +147,61 @@ If you prefer not to use the git hook, ensure your commit messages follow the fo
 To add a new MCP tool:
 
 1. Add the schema in `src/schemas.ts`:
-```typescript
-export const YourToolInputSchema = z.object({
-  // Define your input schema
-});
 
-export type YourToolInput = z.infer<typeof YourToolInputSchema>;
-```
+    ```typescript
+    export const YourToolInputSchema = z.object({
+      // Define your input schema
+    });
 
-2. Add the client method in `src/client.ts`:
-```typescript
-async yourTool(input: YourToolInput): Promise<ResultType> {
-  await this.ensureAuthenticated();
-  
-  return new Promise((resolve, reject) => {
-    // Implement your tool logic
-  });
-}
-```
+    export type YourToolInput = z.infer<typeof YourToolInputSchema>;
+    ```
 
-3. Add the tool definition in `src/index.ts` in `TOOL_DEFINITIONS`:
-```typescript
-{
-  name: "your_tool",
-  description: "Description of what your tool does",
-  inputSchema: {
-    type: "object",
-    properties: {
-      // Define properties
-    },
-    required: ["field1", "field2"],
-  },
-}
-```
+1. Add the client method in `src/client.ts`:
 
-4. Add the handler in `src/index.ts` in the `CallToolRequestSchema` handler:
-```typescript
-case "your_tool": {
-  const input = YourToolInputSchema.parse(request.params.arguments);
-  const result = await this.client.yourTool(input);
-  return {
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify(result, null, 2),
+    ```typescript
+    async yourTool(input: YourToolInput): Promise<ResultType> {
+      await this.ensureAuthenticated();
+
+      return new Promise((resolve, reject) => {
+        // Implement your tool logic
+      });
+    }
+    ```
+
+1. Add the tool definition in `src/index.ts` in `TOOL_DEFINITIONS`:
+
+    ```typescript
+    {
+      name: "your_tool",
+      description: "Description of what your tool does",
+      inputSchema: {
+        type: "object",
+        properties: {
+          // Define properties
+        },
+        required: ["field1", "field2"],
       },
-    ],
-  };
-}
-```
+    }
+    ```
 
-5. Update the README with documentation for your new tool
+1. Add the handler in `src/index.ts` in the `CallToolRequestSchema` handler:
+
+    ```typescript
+    case "your_tool": {
+      const input = YourToolInputSchema.parse(request.params.arguments);
+      const result = await this.client.yourTool(input);
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+    ```
+
+1. Update the README with documentation for your new tool
 
 ### Adding New Monitor Types
 
