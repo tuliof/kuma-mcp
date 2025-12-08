@@ -99,7 +99,7 @@ The Inspector will:
 Once the Inspector is running:
 
 1. **Connect to Server**: The Inspector automatically connects to your MCP server
-2. **Browse Tools**: View all available tools (`add_monitor`, `list_monitors`, etc.)
+2. **Browse Tools**: View all available tools (`add_monitor`, `list_monitors`, etc)
 3. **Test Tools**: Fill in parameters and execute tools to see responses
 4. **Inspect Results**: View detailed request/response JSON
 5. **Debug Issues**: Check for errors and validation problems
