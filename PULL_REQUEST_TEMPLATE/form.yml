@@ -1,0 +1,29 @@
+name: Pull Request
+description: Create a new pull request
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      description: What kind of change does this PR introduce?
+      options:
+        - Bug fix
+        - New feature
+        - Documentation
+        - Refactoring
+        - Performance improvement
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which component is affected?
+      options:
+        - Frontend
+        - Backend
+        - API
+        - Database
+        - Documentation
+    validations:
+      required: true
