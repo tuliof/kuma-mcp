@@ -147,7 +147,6 @@ Add to your `claude_desktop_config.json`:
 - `get_monitor`
 - `list_monitors`
 
-
 ## API Reference
 
 For more information about the Uptime Kuma API, see:
