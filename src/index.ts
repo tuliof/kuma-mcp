@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import { env } from './env'
-import { UptimeKumaMCPServer } from './mcp'
+import { env } from './api/index.js'
+import { UptimeKumaMCPServer } from './mcp.js'
 
 // Start the server
 async function main() {

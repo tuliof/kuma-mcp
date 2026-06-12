@@ -11,10 +11,10 @@
     "build": "bun build src/index.ts --outdir dist --target node --format esm && bun run tsc --emitDeclarationOnly",
     "dev": "bun run src/index.ts",
     "test:integration": "AGENT=1 ./scripts/test-with-docker.sh",
-    "lint": "biome check .",
     "setup-kuma": "bun run scripts/setup-kuma-credentials.ts",
     "preinspect": "docker-compose up -d && bun run setup-kuma",
     "inspect": "bunx @modelcontextprotocol/inspector bun run dev",
+    "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "prepare": "husky"

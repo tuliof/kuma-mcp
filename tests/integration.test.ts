@@ -1,8 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
-import { UptimeKumaClient } from '../src/api'
-import { env } from '../src/env'
-import type { AddMonitorInput } from '../src/schemas'
-import { cleanupAllMonitors, waitForUptimeKuma } from './helpers'
+import { UptimeKumaClient, env, type AddMonitorInput } from '../src/api/index.js'
+import { cleanupAllMonitors, waitForUptimeKuma } from './helpers.js'
 
 describe('Uptime Kuma Integration Tests', () => {
   let client: UptimeKumaClient

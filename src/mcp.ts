@@ -5,20 +5,20 @@ import {
   ListToolsRequestSchema,
   type Tool,
 } from '@modelcontextprotocol/sdk/types.js'
-import { UptimeKumaClient } from './api'
 import {
-  AddMonitorInputSchema,
+  UptimeKumaClient,
   type AuthConfig,
   AuthConfigSchema,
-  FindMonitorsByNameInputSchema,
-  GetMonitorInputSchema,
-  ListMonitorsInputSchema,
-  PauseMonitorInputSchema,
-  RemoveMonitorInputSchema,
-  ResumeMonitorInputSchema,
+  AddMonitorInputSchema,
   UpdateMonitorInputSchema,
+  RemoveMonitorInputSchema,
+  PauseMonitorInputSchema,
+  ResumeMonitorInputSchema,
+  GetMonitorInputSchema,
+  FindMonitorsByNameInputSchema,
+  ListMonitorsInputSchema,
   zodSchemaToToolInputSchema,
-} from './schemas'
+} from './api/index.js'
 
 const TOOL_DEFINITIONS: Tool[] = [
   {

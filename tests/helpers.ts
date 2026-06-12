@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client'
-import type { BaseResponse } from '../src/schemas'
+import type { BaseResponse } from '../src/api/index.js'
 
 interface SetupResponse {
   ok: boolean
