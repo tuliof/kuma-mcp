@@ -30,15 +30,17 @@ async function withSpinner<T>(message: string, promise: Promise<T>): Promise<T> 
     loadingIndex = (loadingIndex + 1) % loadingStates.length
   }, 100)
 
+  const hasCursor = typeof process.stdout.cursorTo === 'function'
+
   try {
     const result = await promise
     clearInterval(loadingInterval)
-    process.stdout.cursorTo(0)
+    if (hasCursor) process.stdout.cursorTo(0)
     process.stdout.write(`\r✓ ${message}\n`)
     return result
   } catch (error) {
     clearInterval(loadingInterval)
-    process.stdout.cursorTo(0)
+    if (hasCursor) process.stdout.cursorTo(0)
     process.stdout.write(`\rx ${message}\n`)
     throw error
   }

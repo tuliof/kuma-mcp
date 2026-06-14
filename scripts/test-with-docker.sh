@@ -161,7 +161,8 @@ run_tests() {
 
   # Run the tests
   cd "$PROJECT_ROOT"
-  bun test tests/integration.test.ts
+  # bun test tests/integration.test.ts --reporter=junit --reporter-outfile=test-results.xml
+  bun test tests/integration.test.ts --reporter=dots
 }
 
 # Main execution
