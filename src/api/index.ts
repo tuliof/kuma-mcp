@@ -1,9 +1,9 @@
 import { io, type Socket } from 'socket.io-client'
-import type { AuthConfig } from './schemas.js'
+import type { AuthConfig, MonitorConfig } from './schemas.js'
 import type { LoginResponse } from './types.js'
 
 // Re-export types
-export type { Monitor } from './types.js'
+export type { BulkPauseResult, BulkResumeResult, BulkUpdateResult, Monitor } from './types.js'
 
 // Import monitor operations
 import * as monitors from './monitors.js'
@@ -151,6 +151,21 @@ export class UptimeKumaClient {
     return monitors.findMonitorsByName(this.getContext(), searchTerm, useRegex)
   }
 
+  async pauseMonitorsByName(searchTerm: string, useRegex?: boolean) {
+    await this.ensureAuthenticated()
+    return monitors.pauseMonitorsByName(this.getContext(), searchTerm, useRegex)
+  }
+
+  async resumeMonitorsByName(searchTerm: string, useRegex?: boolean) {
+    await this.ensureAuthenticated()
+    return monitors.resumeMonitorsByName(this.getContext(), searchTerm, useRegex)
+  }
+
+  async bulkUpdateMonitors(ids: number[], updates: Partial<MonitorConfig>) {
+    await this.ensureAuthenticated()
+    return monitors.bulkUpdateMonitors(this.getContext(), ids, updates)
+  }
+
   async disconnect(): Promise<void> {
     if (this.socket) {
       this.socket.disconnect()
@@ -160,39 +175,44 @@ export class UptimeKumaClient {
   }
 }
 
-// Export all schemas and types from schemas.ts
-export {
-  AuthConfigSchema,
-  MonitorTypeSchema,
-  MonitorConfigSchema,
-  MonitorSummarySchema,
-  AddMonitorInputSchema,
-  UpdateMonitorInputSchema,
-  RemoveMonitorInputSchema,
-  PauseMonitorInputSchema,
-  ResumeMonitorInputSchema,
-  GetMonitorInputSchema,
-  FindMonitorsByNameInputSchema,
-  ListMonitorsInputSchema,
-  BaseResponseSchema,
-  zodSchemaToToolInputSchema,
-} from './schemas.js'
-
-export type {
-  AuthConfig,
-  MonitorType,
-  MonitorConfig,
-  MonitorSummary,
-  AddMonitorInput,
-  UpdateMonitorInput,
-  RemoveMonitorInput,
-  PauseMonitorInput,
-  ResumeMonitorInput,
-  GetMonitorInput,
-  FindMonitorsByNameInput,
-  ListMonitorsInput,
-  BaseResponse,
-} from './schemas.js'
-
 // Export environment configuration
 export { env } from './env.js'
+
+export type {
+  AddMonitorInput,
+  AuthConfig,
+  BaseResponse,
+  BulkUpdateMonitorsInput,
+  FindMonitorsByNameInput,
+  GetMonitorInput,
+  ListMonitorsInput,
+  MonitorConfig,
+  MonitorSummary,
+  MonitorType,
+  PauseMonitorInput,
+  PauseMonitorsByNameInput,
+  RemoveMonitorInput,
+  ResumeMonitorInput,
+  ResumeMonitorsByNameInput,
+  UpdateMonitorInput,
+} from './schemas.js'
+// Export all schemas and types from schemas.ts
+export {
+  AddMonitorInputSchema,
+  AuthConfigSchema,
+  BaseResponseSchema,
+  BulkUpdateMonitorsInputSchema,
+  FindMonitorsByNameInputSchema,
+  GetMonitorInputSchema,
+  ListMonitorsInputSchema,
+  MonitorConfigSchema,
+  MonitorSummarySchema,
+  MonitorTypeSchema,
+  PauseMonitorInputSchema,
+  PauseMonitorsByNameInputSchema,
+  RemoveMonitorInputSchema,
+  ResumeMonitorInputSchema,
+  ResumeMonitorsByNameInputSchema,
+  UpdateMonitorInputSchema,
+  zodSchemaToToolInputSchema,
+} from './schemas.js'

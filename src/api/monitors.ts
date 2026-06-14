@@ -1,5 +1,16 @@
-import type { AddMonitorInput, MonitorSummary, UpdateMonitorInput } from './schemas.js'
-import type { Monitor, SocketContext } from './types.js'
+import type {
+  AddMonitorInput,
+  MonitorConfig,
+  MonitorSummary,
+  UpdateMonitorInput,
+} from './schemas.js'
+import type {
+  BulkPauseResult,
+  BulkResumeResult,
+  BulkUpdateResult,
+  Monitor,
+  SocketContext,
+} from './types.js'
 import { transformMonitorPayload } from './utils.js'
 
 export async function addMonitor(
@@ -171,4 +182,57 @@ export async function findMonitorsByName(
     port: monitor.port,
     active: monitor.active,
   }))
+}
+
+export async function pauseMonitorsByName(
+  context: SocketContext,
+  searchTerm: string,
+  useRegex: boolean = false,
+): Promise<BulkPauseResult> {
+  const matches = await findMonitorsByName(context, searchTerm, useRegex)
+  const monitors = await Promise.all(
+    matches.map(async (m) => {
+      await pauseMonitorById(context, m.id)
+      return { id: m.id, name: m.name }
+    }),
+  )
+  return { paused: monitors.length, monitors }
+}
+
+export async function resumeMonitorsByName(
+  context: SocketContext,
+  searchTerm: string,
+  useRegex: boolean = false,
+): Promise<BulkResumeResult> {
+  const matches = await findMonitorsByName(context, searchTerm, useRegex)
+  const monitors = await Promise.all(
+    matches.map(async (m) => {
+      await resumeMonitorById(context, m.id)
+      return { id: m.id, name: m.name }
+    }),
+  )
+  return { resumed: monitors.length, monitors }
+}
+
+export async function bulkUpdateMonitors(
+  context: SocketContext,
+  ids: number[],
+  updates: Partial<MonitorConfig>,
+): Promise<BulkUpdateResult> {
+  const results: BulkUpdateResult['results'] = []
+
+  for (const id of ids) {
+    try {
+      await updateMonitorById(context, { id, ...updates })
+      results.push({ id, success: true })
+    } catch (error) {
+      results.push({ id, success: false, error: String(error) })
+    }
+  }
+
+  return {
+    updated: results.filter((r) => r.success).length,
+    failed: results.filter((r) => !r.success).length,
+    results,
+  }
 }

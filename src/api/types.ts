@@ -20,3 +20,30 @@ export interface SocketContext {
   socket: Socket
   authenticated: boolean
 }
+
+export interface BulkActionResult {
+  id: number
+  name: string
+}
+
+export interface BulkPauseResult {
+  paused: number
+  monitors: BulkActionResult[]
+}
+
+export interface BulkResumeResult {
+  resumed: number
+  monitors: BulkActionResult[]
+}
+
+export interface BulkUpdateResultItem {
+  id: number
+  success: boolean
+  error?: string
+}
+
+export interface BulkUpdateResult {
+  updated: number
+  failed: number
+  results: BulkUpdateResultItem[]
+}

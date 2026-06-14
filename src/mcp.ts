@@ -6,17 +6,20 @@ import {
   type Tool,
 } from '@modelcontextprotocol/sdk/types.js'
 import {
-  UptimeKumaClient,
+  AddMonitorInputSchema,
   type AuthConfig,
   AuthConfigSchema,
-  AddMonitorInputSchema,
-  UpdateMonitorInputSchema,
-  RemoveMonitorInputSchema,
-  PauseMonitorInputSchema,
-  ResumeMonitorInputSchema,
-  GetMonitorInputSchema,
+  BulkUpdateMonitorsInputSchema,
   FindMonitorsByNameInputSchema,
+  GetMonitorInputSchema,
   ListMonitorsInputSchema,
+  PauseMonitorInputSchema,
+  PauseMonitorsByNameInputSchema,
+  RemoveMonitorInputSchema,
+  ResumeMonitorInputSchema,
+  ResumeMonitorsByNameInputSchema,
+  UpdateMonitorInputSchema,
+  UptimeKumaClient,
   zodSchemaToToolInputSchema,
 } from './api/index.js'
 
@@ -62,6 +65,24 @@ const TOOL_DEFINITIONS: Tool[] = [
     name: 'list_monitors',
     description: 'List all monitors in Uptime Kuma',
     inputSchema: zodSchemaToToolInputSchema(ListMonitorsInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'pause_monitors_by_name',
+    description:
+      'Pause all monitors whose name matches the given pattern. Returns count and details of paused monitors.',
+    inputSchema: zodSchemaToToolInputSchema(PauseMonitorsByNameInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'resume_monitors_by_name',
+    description:
+      'Resume all monitors whose name matches the given pattern. Returns count and details of resumed monitors.',
+    inputSchema: zodSchemaToToolInputSchema(ResumeMonitorsByNameInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'bulk_update_monitors',
+    description:
+      'Update multiple monitors at once by their IDs. Partial failures are reported per monitor.',
+    inputSchema: zodSchemaToToolInputSchema(BulkUpdateMonitorsInputSchema) as Tool['inputSchema'],
   },
 ]
 
@@ -202,6 +223,45 @@ export class UptimeKumaMCPServer {
                 {
                   type: 'text',
                   text: JSON.stringify(monitors, null, 2),
+                },
+              ],
+            }
+          }
+
+          case 'pause_monitors_by_name': {
+            const input = PauseMonitorsByNameInputSchema.parse(request.params.arguments)
+            const result = await this.client.pauseMonitorsByName(input.searchTerm, input.useRegex)
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            }
+          }
+
+          case 'resume_monitors_by_name': {
+            const input = ResumeMonitorsByNameInputSchema.parse(request.params.arguments)
+            const result = await this.client.resumeMonitorsByName(input.searchTerm, input.useRegex)
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            }
+          }
+
+          case 'bulk_update_monitors': {
+            const input = BulkUpdateMonitorsInputSchema.parse(request.params.arguments)
+            const result = await this.client.bulkUpdateMonitors(input.ids, input.updates)
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
                 },
               ],
             }

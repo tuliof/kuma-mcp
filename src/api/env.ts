@@ -6,6 +6,7 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
   server: {
     UPTIME_KUMA_PORT: z.string().default('3001'),
+    // biome-ignore lint/complexity/useLiteralKeys: process.env has index signature
     UPTIME_KUMA_URL: z
       .url()
       .default(`http://localhost:${process.env['UPTIME_KUMA_PORT'] || '3001'}`),

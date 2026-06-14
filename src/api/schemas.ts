@@ -237,11 +237,34 @@ export const FindMonitorsByNameInputSchema = z.object({
 })
 
 // Utility function to generate MCP tool input schema from Zod schema
-export function zodSchemaToToolInputSchema(schema: z.ZodObject<any>) {
+export function zodSchemaToToolInputSchema(schema: z.ZodType) {
   return z.toJSONSchema(schema)
 }
 
 // # Input schemas
+export const PauseMonitorsByNameInputSchema = z.object({
+  searchTerm: z.string().min(1).describe('Name pattern to match monitors against'),
+  useRegex: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe('If true, searchTerm will be treated as a regular expression pattern'),
+})
+
+export const ResumeMonitorsByNameInputSchema = z.object({
+  searchTerm: z.string().min(1).describe('Name pattern to match monitors against'),
+  useRegex: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe('If true, searchTerm will be treated as a regular expression pattern'),
+})
+
+export const BulkUpdateMonitorsInputSchema = z.object({
+  ids: z.array(z.number()).min(1).describe('Array of monitor IDs to update'),
+  updates: MonitorConfigSchema.partial().describe('Fields to update on each monitor'),
+})
+
 export const ListMonitorsInputSchema = z.object({})
 
 export type AddMonitorInput = z.infer<typeof AddMonitorInputSchema>
@@ -252,6 +275,9 @@ export type ResumeMonitorInput = z.infer<typeof ResumeMonitorInputSchema>
 export type GetMonitorInput = z.infer<typeof GetMonitorInputSchema>
 export type FindMonitorsByNameInput = z.infer<typeof FindMonitorsByNameInputSchema>
 export type ListMonitorsInput = z.infer<typeof ListMonitorsInputSchema>
+export type PauseMonitorsByNameInput = z.infer<typeof PauseMonitorsByNameInputSchema>
+export type ResumeMonitorsByNameInput = z.infer<typeof ResumeMonitorsByNameInputSchema>
+export type BulkUpdateMonitorsInput = z.infer<typeof BulkUpdateMonitorsInputSchema>
 
 // # Output schemas
 
