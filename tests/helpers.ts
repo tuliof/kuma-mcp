@@ -147,10 +147,9 @@ async function cleanupAllMonitors(url: string, username: string, password: strin
         })
 
         // Get all monitors
-        const monitors = await new Promise<any[]>((res, rej) => {
-          const handleMonitorList = (data: Record<string, any>) => {
+        const monitors = await new Promise<unknown[]>((res, rej) => {
+          const handleMonitorList = (data: Record<string, unknown>) => {
             socket.off('monitorList', handleMonitorList)
-            console.log(`Get all monitors: ${data}`)
             res(Object.values(data))
           }
 
@@ -170,7 +169,8 @@ async function cleanupAllMonitors(url: string, username: string, password: strin
         })
 
         // Delete all monitors
-        for (const monitor of monitors) {
+        const typedMonitors = monitors as Array<{ id: number; name: string }>
+        for (const monitor of typedMonitors) {
           await new Promise<void>((res, _rej) => {
             socket.emit('deleteMonitor', monitor.id, (response: BaseResponse) => {
               if (response.ok) {

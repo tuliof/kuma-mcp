@@ -123,12 +123,15 @@ export function transformMonitorPayload(
   // Ensure required fields have default values if not provided (only for new monitors)
   if (input.type && !('id' in input)) {
     if (!('notificationIDList' in payload)) {
+      // biome-ignore lint/complexity/useLiteralKeys: Trying to figure out the type coming from Uptime
       payload['notificationIDList'] = {}
     }
     if (!('accepted_statuscodes' in payload)) {
+      // biome-ignore lint/complexity/useLiteralKeys: Trying to figure out the type coming from Uptime
       payload['accepted_statuscodes'] = ['200-299']
     }
     if (!('conditions' in payload)) {
+      // biome-ignore lint/complexity/useLiteralKeys: Trying to figure out the type coming from Uptime
       payload['conditions'] = []
     }
   }
