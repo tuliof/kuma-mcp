@@ -473,6 +473,14 @@ describe('Uptime Kuma Integration Tests', () => {
       expect(result).toEqual([])
     })
 
+    test('should return empty array for non-existent id search', async () => {
+      const result = await client.getMonitorStatus({ id: 999999 })
+
+      // getMonitorById throws for non-existent id, caught in the try/catch,
+      // so the for loop continues and returns empty
+      expect(result).toEqual([])
+    })
+
     test('should find paused monitors by status', async () => {
       const result = await client.getMonitorsByStatus('paused')
 
@@ -525,6 +533,41 @@ describe('Uptime Kuma Integration Tests', () => {
 
       expect(result.status).toBe('paused')
       expect(result.active).toBe(false)
+    })
+
+    test('getMonitorSummaryById returns summary (not throws) for non-existent id', async () => {
+      const result = await client.getMonitorSummaryById(999999)
+
+      expect(result).toBeDefined()
+      expect(result.id).toBe(999999)
+      expect(result.name).toBe('')
+      expect(result.active).toBe(true)
+      expect(result.status).toBe('unknown')
+      expect(result.totalHeartbeats24h).toBe(0)
+      expect(result.recentOutages24h).toBe(0)
+      expect(result.uptime24h).toBeNull()
+      expect(result.avgPing24h).toBeNull()
+      expect(result.latestHeartbeat).toBeNull()
+    })
+
+    test('getMonitorHeartbeatsById returns empty heartbeats for non-existent id', async () => {
+      const result = await client.getMonitorHeartbeatsById(999999, 24)
+
+      expect(result).toBeDefined()
+      expect(result.id).toBe(999999)
+      expect(result.name).toBe('')
+      expect(result.heartbeats).toEqual([])
+    })
+
+    test('getMonitorsByStatus("unknown") returns active monitors with no heartbeats', async () => {
+      const result = await client.getMonitorsByStatus('unknown')
+
+      expect(Array.isArray(result)).toBe(true)
+      // Every returned monitor should have unknown status
+      for (const mon of result) {
+        expect(mon.status).toBe('unknown')
+        expect(mon.active).toBe(true)
+      }
     })
   })
 })
