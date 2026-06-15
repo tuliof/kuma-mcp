@@ -7,6 +7,7 @@
 - **Lint fix**: Run `bun run lint:fix` for safe auto-fixes only. Never run `--unsafe`.
 - **Build**: Always verify with `bun run build` before committing.
 - **Tests**: Run `bun test` against a running Uptime Kuma instance.
-- **Uptime Kuma**: Start via `bun run kuma:start` (docker compose + credentials setup).
+- **Uptime Kuma**: Start via `bun run kuma:start` (docker compose + credentials setup), stop via `bun run kuma:stop` (with volumes cleanup).
 - **Credentials**: `.env` has `UPTIME_KUMA_URL`, `UPTIME_KUMA_USERNAME`, `UPTIME_KUMA_PASSWORD`.
 - **Cleanup**: After any investigation (probe scripts, browser artifacts, temp files), delete all investigation artifacts before finalizing. Run `bun run full-check` at the end — it catches stray files that Biome would scan.
+- **Commits**: Use semantic commit prefixes (`feat:`, `fix:`, `test:`, `chore:`). Group related changes into separate commits — never one giant commit.
