@@ -401,4 +401,130 @@ describe('Uptime Kuma Integration Tests', () => {
       expect(monitor.description).toBe('partial-test')
     })
   })
+
+  describe('Status & Health', () => {
+    const statusMonitorIds: number[] = []
+
+    beforeAll(async () => {
+      const monitors = [
+        {
+          type: 'port' as const,
+          name: 'status-active-monitor',
+          hostname: 'localhost',
+          port: 10,
+          interval: 60,
+          retryInterval: 60,
+          maxretries: 3,
+          active: true,
+        },
+        {
+          type: 'port' as const,
+          name: 'status-paused-monitor',
+          hostname: 'localhost',
+          port: 11,
+          interval: 60,
+          retryInterval: 60,
+          maxretries: 3,
+          active: false,
+        },
+      ]
+      for (const m of monitors) {
+        const result = await client.addMonitor(m)
+        statusMonitorIds.push(result.id)
+        testMonitorIds.push(result.id)
+      }
+    })
+
+    test('should get monitor status by id', async () => {
+      const result = await client.getMonitorStatus({ id: statusMonitorIds[0] })
+
+      expect(result).toHaveLength(1)
+      expect(result[0].id).toBe(statusMonitorIds[0])
+      expect(result[0].name).toBe('status-active-monitor')
+      expect(['up', 'down', 'pending', 'unknown']).toContain(result[0].status)
+      expect(typeof result[0].totalHeartbeats24h).toBe('number')
+      expect(typeof result[0].recentOutages24h).toBe('number')
+      if (result[0].totalHeartbeats24h > 0) {
+        expect(typeof result[0].uptime24h).toBe('number')
+      }
+    })
+
+    test('should get monitor status by name', async () => {
+      const result = await client.getMonitorStatus({ searchTerm: 'status-active-monitor' })
+
+      expect(result).toHaveLength(1)
+      expect(result[0].id).toBe(statusMonitorIds[0])
+    })
+
+    test('should get monitor status by regex', async () => {
+      const result = await client.getMonitorStatus({
+        searchTerm: 'status-(active|paused)',
+        useRegex: true,
+      })
+
+      expect(result).toHaveLength(2)
+      const ids = result.map((r) => r.id).sort()
+      expect(ids).toEqual([statusMonitorIds[0], statusMonitorIds[1]].sort())
+    })
+
+    test('should return empty array for non-existent name search', async () => {
+      const result = await client.getMonitorStatus({ searchTerm: 'nonexistent-monitor' })
+
+      expect(result).toEqual([])
+    })
+
+    test('should find paused monitors by status', async () => {
+      const result = await client.getMonitorsByStatus('paused')
+
+      expect(result.length).toBeGreaterThanOrEqual(1)
+      const pausedMonitor = result.find((m) => m.id === statusMonitorIds[1])
+      expect(pausedMonitor).toBeDefined()
+      expect(pausedMonitor?.status).toBe('paused')
+      expect(pausedMonitor?.active).toBe(false)
+    })
+
+    test('should get raw heartbeats by id', async () => {
+      const result = await client.getMonitorHeartbeatsById(statusMonitorIds[0], 24)
+
+      expect(result.id).toBe(statusMonitorIds[0])
+      expect(result.name).toBe('status-active-monitor')
+      expect(Array.isArray(result.heartbeats)).toBe(true)
+      if (result.heartbeats.length > 0) {
+        const beat = result.heartbeats[0]
+        expect(typeof beat.time).toBe('string')
+        expect(typeof beat.status).toBe('number')
+        expect(beat.ping === null || typeof beat.ping === 'number').toBe(true)
+        expect(beat.msg === null || typeof beat.msg === 'string').toBe(true)
+        expect(typeof beat.important).toBe('boolean')
+        expect(typeof beat.duration).toBe('number')
+      }
+    })
+
+    test('should get summary by id', async () => {
+      const result = await client.getMonitorSummaryById(statusMonitorIds[0])
+
+      expect(result.id).toBe(statusMonitorIds[0])
+      expect(result.name).toBe('status-active-monitor')
+      expect(['up', 'down', 'pending', 'unknown', 'paused', 'maintenance']).toContain(result.status)
+      expect(typeof result.totalHeartbeats24h).toBe('number')
+      expect(typeof result.recentOutages24h).toBe('number')
+      if (result.totalHeartbeats24h > 0) {
+        expect(typeof result.uptime24h).toBe('number')
+        expect(result.uptime24h).toBeGreaterThanOrEqual(0)
+        expect(result.uptime24h).toBeLessThanOrEqual(100)
+      } else {
+        expect(result.status).toBe('pending')
+      }
+      if (result.uptime24h !== null) {
+        expect(typeof result.avgPing24h === 'number' || result.avgPing24h === null).toBe(true)
+      }
+    })
+
+    test('should get summary for paused monitor', async () => {
+      const result = await client.getMonitorSummaryById(statusMonitorIds[1])
+
+      expect(result.status).toBe('paused')
+      expect(result.active).toBe(false)
+    })
+  })
 })
