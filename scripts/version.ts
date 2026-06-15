@@ -183,9 +183,26 @@ if (import.meta.main) {
     console.log(`✅ Released ${tag}`)
     console.log('💡 To push: git push --follow-tags')
   } catch (error) {
+    // Clean up git staging area (e.g., after husky rejects the commit)
+    try {
+      await $`git reset HEAD -- ${PACKAGE_FILE} ${OUTPUT_FILE}`.quiet()
+    } catch {
+      /* nothing staged */
+    }
+
     // Roll back file modifications so the repo stays consistent
     await restoreFile(PACKAGE_FILE, originalPkg)
-    await restoreFile(OUTPUT_FILE, originalChangelog)
+
+    if (originalChangelog === '') {
+      // File didn't exist originally — delete it instead of creating an empty one
+      try {
+        await $`rm -f ${OUTPUT_FILE}`.quiet()
+      } catch {
+        /* file may not have been created */
+      }
+    } else {
+      await restoreFile(OUTPUT_FILE, originalChangelog)
+    }
 
     const message = error instanceof Error ? error.message : String(error)
     console.error(`❌ Release failed — changes reverted: ${message}`)
