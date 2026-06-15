@@ -38,11 +38,11 @@ describe('Uptime Kuma Integration Tests', () => {
     }
 
     // Clean up test monitors
-    for (const id of testMonitorIds) {
+    if (testMonitorIds.length > 0) {
       try {
-        await client.removeMonitorById(id)
+        await client.removeMonitors(testMonitorIds)
       } catch (error) {
-        console.error(`Failed to clean up monitor ${id}:`, error)
+        console.error(`Failed to clean up monitors:`, error)
       }
     }
 
@@ -141,12 +141,12 @@ describe('Uptime Kuma Integration Tests', () => {
 
   test('should get a specific monitor', async () => {
     const monitorId = testMonitorIds[0]
-    const monitor = await client.getMonitorById(monitorId)
+    const monitors = await client.getMonitors([monitorId])
 
-    expect(monitor).toBeDefined()
-    expect(monitor.id).toBe(monitorId)
-    expect(monitor.name).toBe('Test HTTP Monitor')
-    expect(monitor.type).toBe('http')
+    expect(monitors).toHaveLength(1)
+    expect(monitors[0].id).toBe(monitorId)
+    expect(monitors[0].name).toBe('Test HTTP Monitor')
+    expect(monitors[0].type).toBe('http')
   })
 
   test('should update a monitor', async () => {
@@ -165,23 +165,26 @@ describe('Uptime Kuma Integration Tests', () => {
 
   test('should pause a monitor', async () => {
     const monitorId = testMonitorIds[0]
-    await client.pauseMonitorById(monitorId)
+    await client.pauseMonitors([monitorId])
 
-    const monitor = await client.getMonitorById(monitorId)
-    expect(monitor.active).toBe(false)
+    const monitors = await client.getMonitors([monitorId])
+    expect(monitors[0].active).toBe(false)
   })
 
   test('should resume a monitor', async () => {
     const monitorId = testMonitorIds[0]
-    await client.resumeMonitorById(monitorId)
+    await client.resumeMonitors([monitorId])
 
-    const monitor = await client.getMonitorById(monitorId)
-    expect(monitor.active).toBe(true)
+    const monitors = await client.getMonitors([monitorId])
+    expect(monitors[0].active).toBe(true)
   })
 
   test('should delete a monitor', async () => {
     const monitorId = testMonitorIds[testMonitorIds.length - 1]
-    await client.removeMonitorById(monitorId)
+    const result = await client.removeMonitors([monitorId])
+
+    expect(result.removed).toBe(1)
+    expect(result.monitors[0].id).toBe(monitorId)
 
     // Remove from tracking array since it's already deleted
     testMonitorIds.pop()
@@ -238,7 +241,7 @@ describe('Uptime Kuma Integration Tests', () => {
 
   test('should handle errors for non-existent monitor', () => {
     const nonExistentId = 999999
-    expect(client.getMonitorById(nonExistentId)).rejects.toThrow()
+    expect(client.getMonitors([nonExistentId])).rejects.toThrow()
   })
 
   describe('Bulk Operations', () => {
@@ -296,74 +299,54 @@ describe('Uptime Kuma Integration Tests', () => {
     })
 
     afterAll(async () => {
-      for (const id of bulkMonitorIds) {
-        try {
-          await client.resumeMonitorById(id)
-        } catch {
-          /* ignore */
-        }
+      // Ensure all bulk monitors are resumed after tests
+      try {
+        await client.resumeMonitors(bulkMonitorIds)
+      } catch {
+        /* ignore */
       }
     })
 
-    test('should pause monitors by name (plain text match)', async () => {
-      const result = await client.pauseMonitorsByName('bulk-test')
+    test('should pause multiple monitors by IDs', async () => {
+      const ids = [bulkMonitorIds[0], bulkMonitorIds[1], bulkMonitorIds[2]]
+      const result = await client.pauseMonitors(ids)
 
       expect(result.paused).toBe(3)
       expect(result.monitors).toHaveLength(3)
-      expect(result.monitors.map((m) => m.name).sort()).toEqual([
-        'bulk-test-alpha',
-        'bulk-test-beta',
-        'bulk-test-gamma',
-      ])
+      expect(result.monitors.map((m) => m.id).sort()).toEqual([...ids].sort())
 
       for (const m of result.monitors) {
-        const monitor = await client.getMonitorById(m.id)
-        expect(monitor.active).toBe(false)
+        const monitors = await client.getMonitors([m.id])
+        expect(monitors[0].active).toBe(false)
       }
     })
 
-    test('should resume monitors by name (plain text match)', async () => {
-      const result = await client.resumeMonitorsByName('bulk-test')
+    test('should resume multiple monitors by IDs', async () => {
+      const ids = [bulkMonitorIds[0], bulkMonitorIds[1], bulkMonitorIds[2]]
+      const result = await client.resumeMonitors(ids)
 
       expect(result.resumed).toBe(3)
       expect(result.monitors).toHaveLength(3)
-      expect(result.monitors.map((m) => m.name).sort()).toEqual([
-        'bulk-test-alpha',
-        'bulk-test-beta',
-        'bulk-test-gamma',
-      ])
+      expect(result.monitors.map((m) => m.id).sort()).toEqual([...ids].sort())
 
       for (const m of result.monitors) {
-        const monitor = await client.getMonitorById(m.id)
-        expect(monitor.active).toBe(true)
+        const monitors = await client.getMonitors([m.id])
+        expect(monitors[0].active).toBe(true)
       }
     })
 
-    test('should pause monitors by name (regex match)', async () => {
-      const result = await client.pauseMonitorsByName('alpha|gamma', true)
+    test('should pause a single monitor by ID', async () => {
+      const result = await client.pauseMonitors([bulkMonitorIds[0]])
 
-      expect(result.paused).toBe(2)
-      const names = result.monitors.map((m) => m.name).sort()
-      expect(names).toEqual(['bulk-test-alpha', 'bulk-test-gamma'])
-
-      for (const m of result.monitors) {
-        const monitor = await client.getMonitorById(m.id)
-        expect(monitor.active).toBe(false)
-      }
+      expect(result.paused).toBe(1)
+      expect(result.monitors[0].id).toBe(bulkMonitorIds[0])
     })
 
-    test('should return 0 paused when no monitors match', async () => {
-      const result = await client.pauseMonitorsByName('nonexistent-pattern')
+    test('should resume a single monitor by ID', async () => {
+      const result = await client.resumeMonitors([bulkMonitorIds[0]])
 
-      expect(result.paused).toBe(0)
-      expect(result.monitors).toEqual([])
-    })
-
-    test('should return 0 resumed when no monitors match', async () => {
-      const result = await client.resumeMonitorsByName('nonexistent-pattern')
-
-      expect(result.resumed).toBe(0)
-      expect(result.monitors).toEqual([])
+      expect(result.resumed).toBe(1)
+      expect(result.monitors[0].id).toBe(bulkMonitorIds[0])
     })
 
     test('should update multiple monitors by IDs', async () => {
@@ -376,8 +359,8 @@ describe('Uptime Kuma Integration Tests', () => {
       expect(result.results.every((r) => r.success)).toBe(true)
 
       for (const m of result.results) {
-        const monitor = await client.getMonitorById(m.id)
-        expect(monitor.description).toBe('bulk-updated')
+        const monitors = await client.getMonitors([m.id])
+        expect(monitors[0].description).toBe('bulk-updated')
       }
     })
 
@@ -396,9 +379,9 @@ describe('Uptime Kuma Integration Tests', () => {
       expect(failResult?.id).toBe(999999)
       expect(failResult?.error).toBeDefined()
 
-      // Verify the successful update took effect
-      const monitor = await client.getMonitorById(bulkMonitorIds[1])
-      expect(monitor.description).toBe('partial-test')
+      // Verify the successful update took place
+      const monitors = await client.getMonitors([bulkMonitorIds[1]])
+      expect(monitors[0].description).toBe('partial-test')
     })
   })
 

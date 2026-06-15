@@ -6,6 +6,7 @@ import {
   FindMonitorsByNameInputSchema,
   GetMonitorHeartbeatsInputSchema,
   GetMonitorStatusInputSchema,
+  IdsInputSchema,
   MonitorConfigSchema,
   MonitorSummarySchema,
   MonitorTypeSchema,
@@ -408,6 +409,44 @@ describe('BulkUpdateMonitorsInputSchema', () => {
       updates: { active: false, description: 'bulk update' },
     })
     expect(result.success).toBe(true)
+  })
+})
+
+describe('IdsInputSchema', () => {
+  test('rejects empty ids array', () => {
+    const result = IdsInputSchema.safeParse({ ids: [] })
+    expect(result.success).toBe(false)
+  })
+
+  test('accepts single id', () => {
+    const result = IdsInputSchema.safeParse({ ids: [42] })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.ids).toEqual([42])
+    }
+  })
+
+  test('accepts multiple ids', () => {
+    const result = IdsInputSchema.safeParse({ ids: [1, 2, 3] })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.ids).toEqual([1, 2, 3])
+    }
+  })
+
+  test('rejects non-array ids', () => {
+    const result = IdsInputSchema.safeParse({ ids: 'not-an-array' })
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects non-number items', () => {
+    const result = IdsInputSchema.safeParse({ ids: ['abc'] })
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects missing ids field', () => {
+    const result = IdsInputSchema.safeParse({})
+    expect(result.success).toBe(false)
   })
 })
 

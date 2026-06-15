@@ -202,35 +202,17 @@ export const UpdateMonitorInputSchema = z.object({
   ...MonitorConfigSchema.partial().shape,
 })
 
-export const RemoveMonitorInputSchema = z.object({
-  id: z.number(),
-})
-
-export const PauseMonitorInputSchema = z.object({
-  id: z.number(),
-})
-
-export const ResumeMonitorInputSchema = z.object({
-  id: z.number(),
-})
-
-export const GetMonitorInputSchema = z.object({
-  id: z.number(),
-})
-
 export const FindMonitorsByNameInputSchema = z.object({
   searchTerm: z
     .string()
     .describe(
-      'Name or partial name to search for. Can be a plain string (case-insensitive partial match) or a regular expression pattern (e.g., "^prod-.*" to match monitors starting with "prod-", or "api|web" to match monitors containing "api" or "web")',
+      'Name or partial name to search for. Can be a plain string (case-insensitive partial match) or a regular expression pattern (e.g., "^prod-.*")',
     ),
   useRegex: z
     .boolean()
     .optional()
     .default(false)
-    .describe(
-      'If true, searchTerm will be treated as a regular expression pattern. Default is false (plain string search)',
-    ),
+    .describe('Treat searchTerm as a regular expression'),
 })
 
 // Utility function to generate MCP tool input schema from Zod schema
@@ -238,31 +220,18 @@ export function zodSchemaToToolInputSchema(schema: z.ZodType) {
   return z.toJSONSchema(schema)
 }
 
-// # Input schemas
-export const PauseMonitorsByNameInputSchema = z.object({
-  searchTerm: z.string().min(1).describe('Name pattern to match monitors against'),
-  useRegex: z
-    .boolean()
-    .optional()
-    .default(false)
-    .describe('If true, searchTerm will be treated as a regular expression pattern'),
-})
-
-export const ResumeMonitorsByNameInputSchema = z.object({
-  searchTerm: z.string().min(1).describe('Name pattern to match monitors against'),
-  useRegex: z
-    .boolean()
-    .optional()
-    .default(false)
-    .describe('If true, searchTerm will be treated as a regular expression pattern'),
-})
-
 export const BulkUpdateMonitorsInputSchema = z.object({
   ids: z.array(z.number()).min(1).describe('Array of monitor IDs to update'),
   updates: MonitorConfigSchema.partial().describe('Fields to update on each monitor'),
 })
 
 export const ListMonitorsInputSchema = z.object({})
+
+export const IdsInputSchema = z.object({
+  ids: z.array(z.number()).min(1).describe('Array of monitor IDs to target'),
+})
+
+export type IdsInput = z.infer<typeof IdsInputSchema>
 
 export const GetMonitorStatusInputSchema = z
   .object({
@@ -307,14 +276,8 @@ export const GetMonitorSummaryInputSchema = z.object({
 
 export type AddMonitorInput = z.infer<typeof AddMonitorInputSchema>
 export type UpdateMonitorInput = z.infer<typeof UpdateMonitorInputSchema>
-export type RemoveMonitorInput = z.infer<typeof RemoveMonitorInputSchema>
-export type PauseMonitorInput = z.infer<typeof PauseMonitorInputSchema>
-export type ResumeMonitorInput = z.infer<typeof ResumeMonitorInputSchema>
-export type GetMonitorInput = z.infer<typeof GetMonitorInputSchema>
 export type FindMonitorsByNameInput = z.infer<typeof FindMonitorsByNameInputSchema>
 export type ListMonitorsInput = z.infer<typeof ListMonitorsInputSchema>
-export type PauseMonitorsByNameInput = z.infer<typeof PauseMonitorsByNameInputSchema>
-export type ResumeMonitorsByNameInput = z.infer<typeof ResumeMonitorsByNameInputSchema>
 export type BulkUpdateMonitorsInput = z.infer<typeof BulkUpdateMonitorsInputSchema>
 export type GetMonitorStatusInput = z.infer<typeof GetMonitorStatusInputSchema>
 export type GetMonitorsByStatusInput = z.infer<typeof GetMonitorsByStatusInputSchema>

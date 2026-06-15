@@ -49,6 +49,11 @@ export interface BulkUpdateResult {
   results: BulkUpdateResultItem[]
 }
 
+export interface BulkRemoveResult {
+  removed: number
+  monitors: BulkActionResult[]
+}
+
 export type MonitorStatusLabel = 'up' | 'down' | 'pending' | 'maintenance' | 'paused' | 'unknown'
 
 export interface HeartbeatRecord {

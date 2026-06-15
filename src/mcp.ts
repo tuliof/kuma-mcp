@@ -12,16 +12,11 @@ import {
   BulkUpdateMonitorsInputSchema,
   FindMonitorsByNameInputSchema,
   GetMonitorHeartbeatsInputSchema,
-  GetMonitorInputSchema,
   GetMonitorStatusInputSchema,
   GetMonitorSummaryInputSchema,
   GetMonitorsByStatusInputSchema,
+  IdsInputSchema,
   ListMonitorsInputSchema,
-  PauseMonitorInputSchema,
-  PauseMonitorsByNameInputSchema,
-  RemoveMonitorInputSchema,
-  ResumeMonitorInputSchema,
-  ResumeMonitorsByNameInputSchema,
   UpdateMonitorInputSchema,
   UptimeKumaClient,
   zodSchemaToToolInputSchema,
@@ -40,26 +35,6 @@ const TOOL_DEFINITIONS: Tool[] = [
     inputSchema: zodSchemaToToolInputSchema(UpdateMonitorInputSchema) as Tool['inputSchema'],
   },
   {
-    name: 'remove_monitor_by_id',
-    description: 'Remove a monitor from Uptime Kuma using its ID',
-    inputSchema: zodSchemaToToolInputSchema(RemoveMonitorInputSchema) as Tool['inputSchema'],
-  },
-  {
-    name: 'pause_monitor_by_id',
-    description: 'Pause a monitor in Uptime Kuma (stop checking) using its ID',
-    inputSchema: zodSchemaToToolInputSchema(PauseMonitorInputSchema) as Tool['inputSchema'],
-  },
-  {
-    name: 'resume_monitor_by_id',
-    description: 'Resume a paused monitor in Uptime Kuma (start checking again) using its ID',
-    inputSchema: zodSchemaToToolInputSchema(ResumeMonitorInputSchema) as Tool['inputSchema'],
-  },
-  {
-    name: 'get_monitor_by_id',
-    description: 'Get details of a specific monitor using its ID',
-    inputSchema: zodSchemaToToolInputSchema(GetMonitorInputSchema) as Tool['inputSchema'],
-  },
-  {
     name: 'find_monitors_by_name',
     description:
       'Find monitors by name or partial name. Returns a list of matching monitors with id, name, url, description, type, path, hostname, port, and active status.',
@@ -71,16 +46,24 @@ const TOOL_DEFINITIONS: Tool[] = [
     inputSchema: zodSchemaToToolInputSchema(ListMonitorsInputSchema) as Tool['inputSchema'],
   },
   {
-    name: 'pause_monitors_by_name',
-    description:
-      'Pause all monitors whose name matches the given pattern. Returns count and details of paused monitors.',
-    inputSchema: zodSchemaToToolInputSchema(PauseMonitorsByNameInputSchema) as Tool['inputSchema'],
+    name: 'get_monitors',
+    description: 'Get details of specific monitors using their IDs',
+    inputSchema: zodSchemaToToolInputSchema(IdsInputSchema) as Tool['inputSchema'],
   },
   {
-    name: 'resume_monitors_by_name',
-    description:
-      'Resume all monitors whose name matches the given pattern. Returns count and details of resumed monitors.',
-    inputSchema: zodSchemaToToolInputSchema(ResumeMonitorsByNameInputSchema) as Tool['inputSchema'],
+    name: 'pause_monitors',
+    description: 'Pause monitors in Uptime Kuma (stop checking) using their IDs',
+    inputSchema: zodSchemaToToolInputSchema(IdsInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'resume_monitors',
+    description: 'Resume paused monitors in Uptime Kuma (start checking again) using their IDs',
+    inputSchema: zodSchemaToToolInputSchema(IdsInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'remove_monitors',
+    description: 'Remove monitors from Uptime Kuma using their IDs',
+    inputSchema: zodSchemaToToolInputSchema(IdsInputSchema) as Tool['inputSchema'],
   },
   {
     name: 'bulk_update_monitors',
@@ -178,58 +161,6 @@ export class UptimeKumaMCPServer {
             }
           }
 
-          case 'remove_monitor_by_id': {
-            const input = RemoveMonitorInputSchema.parse(request.params.arguments)
-            await this.client.removeMonitorById(input.id)
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: `Monitor ${input.id} removed successfully`,
-                },
-              ],
-            }
-          }
-
-          case 'pause_monitor_by_id': {
-            const input = PauseMonitorInputSchema.parse(request.params.arguments)
-            await this.client.pauseMonitorById(input.id)
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: `Monitor ${input.id} paused successfully`,
-                },
-              ],
-            }
-          }
-
-          case 'resume_monitor_by_id': {
-            const input = ResumeMonitorInputSchema.parse(request.params.arguments)
-            await this.client.resumeMonitorById(input.id)
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: `Monitor ${input.id} resumed successfully`,
-                },
-              ],
-            }
-          }
-
-          case 'get_monitor_by_id': {
-            const input = GetMonitorInputSchema.parse(request.params.arguments)
-            const monitor = await this.client.getMonitorById(input.id)
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(monitor, null, 2),
-                },
-              ],
-            }
-          }
-
           case 'find_monitors_by_name': {
             const input = FindMonitorsByNameInputSchema.parse(request.params.arguments)
             const monitors = await this.client.findMonitorsByName(input.searchTerm, input.useRegex)
@@ -256,9 +187,22 @@ export class UptimeKumaMCPServer {
             }
           }
 
-          case 'pause_monitors_by_name': {
-            const input = PauseMonitorsByNameInputSchema.parse(request.params.arguments)
-            const result = await this.client.pauseMonitorsByName(input.searchTerm, input.useRegex)
+          case 'get_monitors': {
+            const input = IdsInputSchema.parse(request.params.arguments)
+            const monitors = await this.client.getMonitors(input.ids)
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(monitors, null, 2),
+                },
+              ],
+            }
+          }
+
+          case 'pause_monitors': {
+            const input = IdsInputSchema.parse(request.params.arguments)
+            const result = await this.client.pauseMonitors(input.ids)
             return {
               content: [
                 {
@@ -269,9 +213,22 @@ export class UptimeKumaMCPServer {
             }
           }
 
-          case 'resume_monitors_by_name': {
-            const input = ResumeMonitorsByNameInputSchema.parse(request.params.arguments)
-            const result = await this.client.resumeMonitorsByName(input.searchTerm, input.useRegex)
+          case 'resume_monitors': {
+            const input = IdsInputSchema.parse(request.params.arguments)
+            const result = await this.client.resumeMonitors(input.ids)
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            }
+          }
+
+          case 'remove_monitors': {
+            const input = IdsInputSchema.parse(request.params.arguments)
+            const result = await this.client.removeMonitors(input.ids)
             return {
               content: [
                 {

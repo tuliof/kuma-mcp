@@ -7,6 +7,7 @@ import type {
 } from './schemas.js'
 import type {
   BulkPauseResult,
+  BulkRemoveResult,
   BulkResumeResult,
   BulkUpdateResult,
   HeartbeatRecord,
@@ -108,6 +109,52 @@ export async function resumeMonitorById(context: SocketContext, id: number): Pro
   })
 }
 
+export async function getMonitors(context: SocketContext, ids: number[]): Promise<Monitor[]> {
+  return Promise.all(ids.map((id) => getMonitorById(context, id)))
+}
+
+export async function pauseMonitors(
+  context: SocketContext,
+  ids: number[],
+): Promise<BulkPauseResult> {
+  const monitors = await Promise.all(
+    ids.map(async (id) => {
+      const mon = await getMonitorById(context, id)
+      await pauseMonitorById(context, id)
+      return { id: mon.id, name: mon.name }
+    }),
+  )
+  return { paused: monitors.length, monitors }
+}
+
+export async function resumeMonitors(
+  context: SocketContext,
+  ids: number[],
+): Promise<BulkResumeResult> {
+  const monitors = await Promise.all(
+    ids.map(async (id) => {
+      const mon = await getMonitorById(context, id)
+      await resumeMonitorById(context, id)
+      return { id: mon.id, name: mon.name }
+    }),
+  )
+  return { resumed: monitors.length, monitors }
+}
+
+export async function removeMonitors(
+  context: SocketContext,
+  ids: number[],
+): Promise<BulkRemoveResult> {
+  const monitors = await Promise.all(
+    ids.map(async (id) => {
+      const mon = await getMonitorById(context, id)
+      await removeMonitorById(context, id)
+      return { id: mon.id, name: mon.name }
+    }),
+  )
+  return { removed: monitors.length, monitors }
+}
+
 export async function getMonitorById(context: SocketContext, id: number): Promise<Monitor> {
   return new Promise((resolve, reject) => {
     context.socket.emit(
@@ -187,36 +234,6 @@ export async function findMonitorsByName(
     port: monitor.port,
     active: monitor.active,
   }))
-}
-
-export async function pauseMonitorsByName(
-  context: SocketContext,
-  searchTerm: string,
-  useRegex: boolean = false,
-): Promise<BulkPauseResult> {
-  const matches = await findMonitorsByName(context, searchTerm, useRegex)
-  const monitors = await Promise.all(
-    matches.map(async (m) => {
-      await pauseMonitorById(context, m.id)
-      return { id: m.id, name: m.name }
-    }),
-  )
-  return { paused: monitors.length, monitors }
-}
-
-export async function resumeMonitorsByName(
-  context: SocketContext,
-  searchTerm: string,
-  useRegex: boolean = false,
-): Promise<BulkResumeResult> {
-  const matches = await findMonitorsByName(context, searchTerm, useRegex)
-  const monitors = await Promise.all(
-    matches.map(async (m) => {
-      await resumeMonitorById(context, m.id)
-      return { id: m.id, name: m.name }
-    }),
-  )
-  return { resumed: monitors.length, monitors }
 }
 
 export async function bulkUpdateMonitors(

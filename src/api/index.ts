@@ -5,6 +5,7 @@ import type { LoginResponse } from './types.js'
 // Re-export types
 export type {
   BulkPauseResult,
+  BulkRemoveResult,
   BulkResumeResult,
   BulkUpdateResult,
   HeartbeatRecord,
@@ -130,24 +131,24 @@ export class UptimeKumaClient {
     return monitors.updateMonitorById(this.getContext(), input)
   }
 
-  async removeMonitorById(id: number) {
+  async getMonitors(ids: number[]) {
     await this.ensureAuthenticated()
-    return monitors.removeMonitorById(this.getContext(), id)
+    return monitors.getMonitors(this.getContext(), ids)
   }
 
-  async pauseMonitorById(id: number) {
+  async pauseMonitors(ids: number[]) {
     await this.ensureAuthenticated()
-    return monitors.pauseMonitorById(this.getContext(), id)
+    return monitors.pauseMonitors(this.getContext(), ids)
   }
 
-  async resumeMonitorById(id: number) {
+  async resumeMonitors(ids: number[]) {
     await this.ensureAuthenticated()
-    return monitors.resumeMonitorById(this.getContext(), id)
+    return monitors.resumeMonitors(this.getContext(), ids)
   }
 
-  async getMonitorById(id: number) {
+  async removeMonitors(ids: number[]) {
     await this.ensureAuthenticated()
-    return monitors.getMonitorById(this.getContext(), id)
+    return monitors.removeMonitors(this.getContext(), ids)
   }
 
   async listMonitors() {
@@ -158,16 +159,6 @@ export class UptimeKumaClient {
   async findMonitorsByName(searchTerm: string, useRegex: boolean = false) {
     await this.ensureAuthenticated()
     return monitors.findMonitorsByName(this.getContext(), searchTerm, useRegex)
-  }
-
-  async pauseMonitorsByName(searchTerm: string, useRegex?: boolean) {
-    await this.ensureAuthenticated()
-    return monitors.pauseMonitorsByName(this.getContext(), searchTerm, useRegex)
-  }
-
-  async resumeMonitorsByName(searchTerm: string, useRegex?: boolean) {
-    await this.ensureAuthenticated()
-    return monitors.resumeMonitorsByName(this.getContext(), searchTerm, useRegex)
   }
 
   async bulkUpdateMonitors(ids: number[], updates: Partial<MonitorConfig>) {
@@ -213,16 +204,11 @@ export type {
   BaseResponse,
   BulkUpdateMonitorsInput,
   FindMonitorsByNameInput,
-  GetMonitorInput,
+  IdsInput,
   ListMonitorsInput,
   MonitorConfig,
   MonitorSummary,
   MonitorType,
-  PauseMonitorInput,
-  PauseMonitorsByNameInput,
-  RemoveMonitorInput,
-  ResumeMonitorInput,
-  ResumeMonitorsByNameInput,
   UpdateMonitorInput,
 } from './schemas.js'
 // Export all schemas and types from schemas.ts
@@ -233,19 +219,14 @@ export {
   BulkUpdateMonitorsInputSchema,
   FindMonitorsByNameInputSchema,
   GetMonitorHeartbeatsInputSchema,
-  GetMonitorInputSchema,
   GetMonitorStatusInputSchema,
   GetMonitorSummaryInputSchema,
   GetMonitorsByStatusInputSchema,
+  IdsInputSchema,
   ListMonitorsInputSchema,
   MonitorConfigSchema,
   MonitorSummarySchema,
   MonitorTypeSchema,
-  PauseMonitorInputSchema,
-  PauseMonitorsByNameInputSchema,
-  RemoveMonitorInputSchema,
-  ResumeMonitorInputSchema,
-  ResumeMonitorsByNameInputSchema,
   UpdateMonitorInputSchema,
   zodSchemaToToolInputSchema,
 } from './schemas.js'
