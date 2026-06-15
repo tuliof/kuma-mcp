@@ -24,8 +24,9 @@ commit_parsers = [
   { message = "^feat", group = "Added"},
   { message = "^fix", group = "Fixed"},
   { message = "^(refactor|docs|style|test|chore|ci|build|perf)", group = "Changed"},
+  { breaking = true, group = "Breaking"},
 ]
-protect_breaking_commits = false
+protect_breaking_commits = true
 filter_commits = false
 tag_pattern = "v[0-9].*"
 topo_order = false

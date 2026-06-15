@@ -16,6 +16,11 @@ interface PackageJsonShape {
   version: string
 }
 
+/** Full package.json with known `version` field and an index signature for all other fields. */
+interface MutablePackageJson extends PackageJsonShape {
+  [key: string]: unknown
+}
+
 // ── Guard: parse and validate the bump type argument ──
 
 function parseBumpType(raw: string | undefined): BumpType {
@@ -46,20 +51,25 @@ async function readPackageVersion(): Promise<string> {
   return pkg.version
 }
 
-function bumpSemver(current: string, bumpType: BumpType): string {
-  const parts = current.split('.')
+export function bumpSemver(current: string, bumpType: BumpType): string {
+  // Handle pre-release suffix (e.g., 1.0.0-alpha.1, 2.0.0-rc.0)
+  const prereleaseIndex = current.indexOf('-')
+  const versionPart = prereleaseIndex === -1 ? current : current.slice(0, prereleaseIndex)
+  const prereleaseSuffix = prereleaseIndex === -1 ? '' : current.slice(prereleaseIndex)
+
+  const parts = versionPart.split('.')
 
   if (parts.length !== 3) {
-    console.error(`❌ Cannot bump version: "${current}" is not a valid semver string`)
-    process.exit(1)
+    throw new Error(
+      `Cannot bump version: "${current}" is not a valid semver string (expected MAJOR.MINOR.PATCH)`,
+    )
   }
 
   const numericParts = parts.map(Number)
   const hasInvalidPart = numericParts.some((p) => Number.isNaN(p))
 
   if (hasInvalidPart) {
-    console.error(`❌ Cannot bump version: "${current}" contains non-numeric segments`)
-    process.exit(1)
+    throw new Error(`Cannot bump version: "${current}" contains non-numeric segments`)
   }
 
   const bumpIndex: Record<BumpType, number> = { major: 0, minor: 1, patch: 2 }
@@ -73,18 +83,17 @@ function bumpSemver(current: string, bumpType: BumpType): string {
   const currentValue = numericParts[index]
 
   if (currentValue === undefined) {
-    console.error(`❌ Version part at index ${index} is undefined for "${current}"`)
-    process.exit(1)
+    throw new Error(`Version part at index ${index} is undefined for "${current}"`)
   }
 
   numericParts[index] = currentValue + 1
 
-  return numericParts.join('.')
+  return `${numericParts.join('.')}${prereleaseSuffix}`
 }
 
 async function writePackageVersion(newVersion: string): Promise<void> {
   const pkgFile = Bun.file(PACKAGE_FILE)
-  const pkg = (await pkgFile.json()) as Record<string, unknown>
+  const pkg = (await pkgFile.json()) as MutablePackageJson
   pkg.version = newVersion
   await Bun.write(PACKAGE_FILE, `${JSON.stringify(pkg, null, 2)}\n`)
 }
@@ -123,27 +132,63 @@ async function finalizeChangelog(tag: string): Promise<void> {
   }
 }
 
+// ── Rollback helpers ──
+
+/**
+ * Reads the current on-disk content of a file.
+ * Returns an empty string if the file does not exist (e.g., first release with no CHANGELOG.md yet).
+ */
+async function readFileContent(path: string): Promise<string> {
+  const file = Bun.file(path)
+  const exists = await file.exists()
+  if (!exists) {
+    return ''
+  }
+  return file.text()
+}
+
+async function restoreFile(path: string, content: string): Promise<void> {
+  await Bun.write(path, content)
+}
+
 // ── Main ──
 
-const bumpType = parseBumpType(Bun.argv[2])
+if (import.meta.main) {
+  const bumpType = parseBumpType(Bun.argv[2])
 
-await verifyCleanWorkingTree()
-await verifyGitCliff()
+  await verifyCleanWorkingTree()
+  await verifyGitCliff()
 
-const currentVersion = await readPackageVersion()
-const newVersion = bumpSemver(currentVersion, bumpType)
-const tag = `v${newVersion}`
+  const currentVersion = await readPackageVersion()
+  const newVersion = bumpSemver(currentVersion, bumpType)
+  const tag = `v${newVersion}`
 
-console.log(`📦 Bumping version: ${currentVersion} → ${newVersion}`)
-await writePackageVersion(newVersion)
+  console.log(`📦 Bumping version: ${currentVersion} → ${newVersion}`)
 
-console.log(`📝 Finalizing changelog for ${tag}...`)
-await finalizeChangelog(tag)
+  // Snapshot originals before any modifications (for atomic rollback)
+  const originalPkg = await readFileContent(PACKAGE_FILE)
+  const originalChangelog = await readFileContent(OUTPUT_FILE)
 
-console.log('📦 Committing release...')
-await $`git add ${PACKAGE_FILE} ${OUTPUT_FILE}`
-await $`git commit -m ${`chore: release ${tag}`}`
-await $`git tag ${tag}`
+  try {
+    await writePackageVersion(newVersion)
 
-console.log(`✅ Released ${tag}`)
-console.log('💡 To push: git push --follow-tags')
+    console.log(`📝 Finalizing changelog for ${tag}...`)
+    await finalizeChangelog(tag)
+
+    console.log('📦 Committing release...')
+    await $`git add ${PACKAGE_FILE} ${OUTPUT_FILE}`
+    await $`git commit -m ${`chore: release ${tag}`}`
+    await $`git tag ${tag}`
+
+    console.log(`✅ Released ${tag}`)
+    console.log('💡 To push: git push --follow-tags')
+  } catch (error) {
+    // Roll back file modifications so the repo stays consistent
+    await restoreFile(PACKAGE_FILE, originalPkg)
+    await restoreFile(OUTPUT_FILE, originalChangelog)
+
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(`❌ Release failed — changes reverted: ${message}`)
+    process.exit(1)
+  }
+}
