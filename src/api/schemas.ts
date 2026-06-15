@@ -267,6 +267,47 @@ export const BulkUpdateMonitorsInputSchema = z.object({
 
 export const ListMonitorsInputSchema = z.object({})
 
+export const GetMonitorStatusInputSchema = z
+  .object({
+    id: z.number().optional().describe('Lookup by monitor ID'),
+    searchTerm: z
+      .string()
+      .min(1)
+      .optional()
+      .describe('Name pattern to search by (supports regex with useRegex)'),
+    useRegex: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe('Treat searchTerm as a regular expression'),
+  })
+  .refine(
+    (data) =>
+      data.id !== undefined || (data.searchTerm !== undefined && data.searchTerm.length > 0),
+    { message: 'Either "id" or "searchTerm" must be provided' },
+  )
+
+export const GetMonitorsByStatusInputSchema = z.object({
+  status: z
+    .enum(['up', 'down', 'pending', 'maintenance', 'paused', 'unknown'])
+    .describe('Filter monitors by current status'),
+})
+
+export const GetMonitorHeartbeatsInputSchema = z.object({
+  id: z.number().describe('Monitor ID to get heartbeats for'),
+  hours: z
+    .number()
+    .min(1)
+    .max(720)
+    .optional()
+    .default(24)
+    .describe('Number of hours of heartbeat history to return (default: 24)'),
+})
+
+export const GetMonitorSummaryInputSchema = z.object({
+  id: z.number().describe('Monitor ID to get summary for'),
+})
+
 export type AddMonitorInput = z.infer<typeof AddMonitorInputSchema>
 export type UpdateMonitorInput = z.infer<typeof UpdateMonitorInputSchema>
 export type RemoveMonitorInput = z.infer<typeof RemoveMonitorInputSchema>
@@ -278,6 +319,10 @@ export type ListMonitorsInput = z.infer<typeof ListMonitorsInputSchema>
 export type PauseMonitorsByNameInput = z.infer<typeof PauseMonitorsByNameInputSchema>
 export type ResumeMonitorsByNameInput = z.infer<typeof ResumeMonitorsByNameInputSchema>
 export type BulkUpdateMonitorsInput = z.infer<typeof BulkUpdateMonitorsInputSchema>
+export type GetMonitorStatusInput = z.infer<typeof GetMonitorStatusInputSchema>
+export type GetMonitorsByStatusInput = z.infer<typeof GetMonitorsByStatusInputSchema>
+export type GetMonitorHeartbeatsInput = z.infer<typeof GetMonitorHeartbeatsInputSchema>
+export type GetMonitorSummaryInput = z.infer<typeof GetMonitorSummaryInputSchema>
 
 // # Output schemas
 

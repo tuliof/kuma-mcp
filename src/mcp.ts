@@ -11,7 +11,11 @@ import {
   AuthConfigSchema,
   BulkUpdateMonitorsInputSchema,
   FindMonitorsByNameInputSchema,
+  GetMonitorHeartbeatsInputSchema,
   GetMonitorInputSchema,
+  GetMonitorStatusInputSchema,
+  GetMonitorSummaryInputSchema,
+  GetMonitorsByStatusInputSchema,
   ListMonitorsInputSchema,
   PauseMonitorInputSchema,
   PauseMonitorsByNameInputSchema,
@@ -83,6 +87,30 @@ const TOOL_DEFINITIONS: Tool[] = [
     description:
       'Update multiple monitors at once by their IDs. Partial failures are reported per monitor.',
     inputSchema: zodSchemaToToolInputSchema(BulkUpdateMonitorsInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'get_monitor_status',
+    description:
+      'Get current status of a monitor. Can look up by ID or by name/regex. Returns status (up/down/pending/maintenance/paused/unknown) and latest heartbeat info.',
+    inputSchema: zodSchemaToToolInputSchema(GetMonitorStatusInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'get_monitors_by_status',
+    description:
+      'Find all monitors with a given status (up, down, pending, maintenance, paused, unknown). Returns matching monitors with their current status info.',
+    inputSchema: zodSchemaToToolInputSchema(GetMonitorsByStatusInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'get_monitor_heartbeats_by_id',
+    description:
+      'Get raw heartbeat records for a monitor. Each heartbeat contains a timestamp, status, ping response time, and response message. Use this for detailed monitoring history.',
+    inputSchema: zodSchemaToToolInputSchema(GetMonitorHeartbeatsInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'get_monitor_summary_by_id',
+    description:
+      "Get an aggregated summary of a monitor's health over the last 24 hours. Returns uptime percentage, average ping, total heartbeats, and recent outage count. Use this for a quick health overview.",
+    inputSchema: zodSchemaToToolInputSchema(GetMonitorSummaryInputSchema) as Tool['inputSchema'],
   },
 ]
 
@@ -264,6 +292,38 @@ export class UptimeKumaMCPServer {
                   text: JSON.stringify(result, null, 2),
                 },
               ],
+            }
+          }
+
+          case 'get_monitor_status': {
+            const input = GetMonitorStatusInputSchema.parse(request.params.arguments)
+            const result = await this.client.getMonitorStatus(input)
+            return {
+              content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+            }
+          }
+
+          case 'get_monitors_by_status': {
+            const input = GetMonitorsByStatusInputSchema.parse(request.params.arguments)
+            const result = await this.client.getMonitorsByStatus(input.status)
+            return {
+              content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+            }
+          }
+
+          case 'get_monitor_heartbeats_by_id': {
+            const input = GetMonitorHeartbeatsInputSchema.parse(request.params.arguments)
+            const result = await this.client.getMonitorHeartbeatsById(input.id, input.hours)
+            return {
+              content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+            }
+          }
+
+          case 'get_monitor_summary_by_id': {
+            const input = GetMonitorSummaryInputSchema.parse(request.params.arguments)
+            const result = await this.client.getMonitorSummaryById(input.id)
+            return {
+              content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
             }
           }
 

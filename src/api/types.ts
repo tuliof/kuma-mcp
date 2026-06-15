@@ -47,3 +47,48 @@ export interface BulkUpdateResult {
   failed: number
   results: BulkUpdateResultItem[]
 }
+
+export type MonitorStatusLabel = 'up' | 'down' | 'pending' | 'maintenance' | 'paused' | 'unknown'
+
+export interface HeartbeatRecord {
+  id: number
+  monitorId: number
+  status: number
+  time: string
+  msg: string | null
+  ping: number | null
+  important: boolean
+  duration: number
+  retries: number
+}
+
+export interface LatestHeartbeat {
+  status: MonitorStatusLabel
+  time: string
+  msg: string | null
+  ping: number | null
+}
+
+export interface MonitorStatusResult {
+  id: number
+  name: string
+  active: boolean
+  status: MonitorStatusLabel
+  uptime24h: number | null
+  avgPing24h: number | null
+  totalHeartbeats24h: number
+  recentOutages24h: number
+  latestHeartbeat: LatestHeartbeat | null
+}
+
+export interface MonitorSummaryResult {
+  id: number
+  name: string
+  active: boolean
+  status: MonitorStatusLabel
+  uptime24h: number | null
+  avgPing24h: number | null
+  totalHeartbeats24h: number
+  recentOutages24h: number
+  latestHeartbeat: LatestHeartbeat | null
+}

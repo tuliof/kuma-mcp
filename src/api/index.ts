@@ -3,7 +3,16 @@ import type { AuthConfig, MonitorConfig } from './schemas.js'
 import type { LoginResponse } from './types.js'
 
 // Re-export types
-export type { BulkPauseResult, BulkResumeResult, BulkUpdateResult, Monitor } from './types.js'
+export type {
+  BulkPauseResult,
+  BulkResumeResult,
+  BulkUpdateResult,
+  HeartbeatRecord,
+  Monitor,
+  MonitorStatusLabel,
+  MonitorStatusResult,
+  MonitorSummaryResult,
+} from './types.js'
 
 // Import monitor operations
 import * as monitors from './monitors.js'
@@ -166,6 +175,26 @@ export class UptimeKumaClient {
     return monitors.bulkUpdateMonitors(this.getContext(), ids, updates)
   }
 
+  async getMonitorStatus(input: import('./schemas.js').GetMonitorStatusInput) {
+    await this.ensureAuthenticated()
+    return monitors.getMonitorStatus(this.getContext(), input)
+  }
+
+  async getMonitorsByStatus(status: import('./types.js').MonitorStatusLabel) {
+    await this.ensureAuthenticated()
+    return monitors.getMonitorsByStatus(this.getContext(), status)
+  }
+
+  async getMonitorHeartbeatsById(id: number, hours?: number) {
+    await this.ensureAuthenticated()
+    return monitors.getMonitorHeartbeatsById(this.getContext(), id, hours)
+  }
+
+  async getMonitorSummaryById(id: number) {
+    await this.ensureAuthenticated()
+    return monitors.getMonitorSummaryById(this.getContext(), id)
+  }
+
   async disconnect(): Promise<void> {
     if (this.socket) {
       this.socket.disconnect()
@@ -203,7 +232,11 @@ export {
   BaseResponseSchema,
   BulkUpdateMonitorsInputSchema,
   FindMonitorsByNameInputSchema,
+  GetMonitorHeartbeatsInputSchema,
   GetMonitorInputSchema,
+  GetMonitorStatusInputSchema,
+  GetMonitorSummaryInputSchema,
+  GetMonitorsByStatusInputSchema,
   ListMonitorsInputSchema,
   MonitorConfigSchema,
   MonitorSummarySchema,
