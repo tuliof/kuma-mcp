@@ -18,6 +18,9 @@ npm-debug.log*
 *.swp
 *.swo
 
+#
+.opencode/agent-notes/
+
 # OS
 .DS_Store
 Thumbs.db
