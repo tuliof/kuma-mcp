@@ -9,3 +9,4 @@
 - **Tests**: Run `bun test` against a running Uptime Kuma instance.
 - **Uptime Kuma**: Start via `bun run kuma:start` (docker compose + credentials setup).
 - **Credentials**: `.env` has `UPTIME_KUMA_URL`, `UPTIME_KUMA_USERNAME`, `UPTIME_KUMA_PASSWORD`.
+- **Cleanup**: After any investigation (probe scripts, browser artifacts, temp files), delete all investigation artifacts before finalizing. Run `bun run full-check` at the end — it catches stray files that Biome would scan.

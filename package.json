@@ -13,6 +13,7 @@
     "test:integration": "AGENT=1 ./scripts/test-with-docker.sh",
     "setup-kuma": "bun run scripts/setup-kuma-credentials.ts",
     "kuma:start": "docker compose up -d && bun run setup-kuma",
+    "kuma:stop": "docker compose down --volumes",
     "preinspect": "bun run kuma:start",
     "inspect": "bunx @modelcontextprotocol/inspector bun run dev",
     "full-check": "biome check . && bun run build && bun run test:integration",
