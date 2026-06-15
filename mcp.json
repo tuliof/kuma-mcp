@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "kuma": {
+      "command": "bun",
+      "args": ["run", "dev"],
+      "env": {
+        "UPTIME_KUMA_URL": "http://localhost:3001",
+        "UPTIME_KUMA_USERNAME": "admin",
+        "UPTIME_KUMA_PASSWORD": "admin123"
+      }
+    }
+  }
+}

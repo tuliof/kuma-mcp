@@ -113,7 +113,30 @@ This is especially useful for:
 
 ## MCP Configuration
 
-To use this server with an MCP client like Claude Desktop, add it to your MCP configuration:
+To use this server with an MCP client, add it to your client's MCP configuration using the built `dist/index.js` entry point.
+
+> [!NOTE]
+> Environment variables can be passed from `.env` or set directly in the MCP client config (preferred for tools like GitHub Copilot that don't load `.env` natively).
+
+### GitHub Copilot Configuration
+
+In your GitHub Copilot settings, edit `~/.github/copilot.json` (or the VS Code equivalent):
+
+```jsonc
+{
+  "mcpServers": {
+    "kuma-mcp": {
+      "command": "node",
+      "args": ["/path/to/kuma-mcp/dist/index.js"],
+      "env": {
+        "UPTIME_KUMA_URL": "http://localhost:3001",
+        "UPTIME_KUMA_USERNAME": "your-username",
+        "UPTIME_KUMA_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
 
 ### Claude Desktop Configuration
 
@@ -128,7 +151,7 @@ Add to your `claude_desktop_config.json`:
       "env": {
         "UPTIME_KUMA_URL": "http://localhost:3001",
         "UPTIME_KUMA_USERNAME": "your-username",
-        "UPTIME_KUMA_PASSWORD": "your-password"
+        "UPTIME_KUMA_PASSWORD": "your-password",
         // Alternative: Use API key instead of username/password
         // "UPTIME_KUMA_API_KEY": "your-api-key"
       }
@@ -137,15 +160,46 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
+### OpenCode Configuration
+
+Add to your project's `.opencode.json` or global config:
+
+```jsonc
+{
+  "mcp": {
+    "kuma-mcp": {
+      "type": "command",
+      "command": "bun",
+      "args": ["run", "dev"],
+      "env": {
+        "UPTIME_KUMA_URL": "http://localhost:3001",
+        "UPTIME_KUMA_USERNAME": "admin",
+        "UPTIME_KUMA_PASSWORD": "admin123"
+      }
+    }
+  }
+}
+```
+
 ## Available Tools
 
-- `add_monitor`
-- `update_monitor`
-- `remove_monitor`
-- `pause_monitor`
-- `resume_monitor`
-- `get_monitor`
-- `list_monitors`
+| Tool | Description |
+|------|-------------|
+| `add_monitor` | Add a new monitor |
+| `update_monitor_by_id` | Update an existing monitor by ID |
+| `remove_monitor_by_id` | Remove a monitor by ID |
+| `pause_monitor_by_id` | Pause a monitor by ID |
+| `resume_monitor_by_id` | Resume a paused monitor by ID |
+| `get_monitor_by_id` | Get monitor details by ID |
+| `find_monitors_by_name` | Find monitors by name (supports regex) |
+| `list_monitors` | List all monitors |
+| `pause_monitors_by_name` | Pause all monitors matching a name pattern |
+| `resume_monitors_by_name` | Resume all monitors matching a name pattern |
+| `bulk_update_monitors` | Update multiple monitors at once |
+| `get_monitor_status` | Get current status of a monitor |
+| `get_monitors_by_status` | Find monitors by status (up/down/paused/...) |
+| `get_monitor_heartbeats_by_id` | Get raw heartbeat records |
+| `get_monitor_summary_by_id` | Get aggregated 24h health summary |
 
 
 ## API Reference

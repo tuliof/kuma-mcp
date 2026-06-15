@@ -122,7 +122,7 @@ export class UptimeKumaMCPServer {
     this.server = new Server(
       {
         name: 'kuma-mcp',
-        version: '1.0.0',
+        version: '0.1.0',
       },
       {
         capabilities: {

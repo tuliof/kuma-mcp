@@ -11,13 +11,12 @@ const COMMON_FIELDS = [
   'active',
   'description',
   'parent',
-  'pathName',
 ]
 
 // Fields for monitors with URL (HTTP-based)
 const URL_BASED_FIELDS = [
   'url',
-  'requestTimeout',
+  'timeout',
   'method',
   'headers',
   'body',
@@ -39,12 +38,8 @@ const mergeFields = (...fieldArrays: string[][]): Set<string> => {
 }
 
 // Define which fields are relevant for each monitor type
-const MONITOR_TYPE_FIELDS: Record<MonitorType, Set<string>> = {
-  http: mergeFields(COMMON_FIELDS, URL_BASED_FIELDS, [
-    'keyword',
-    'invertKeyword',
-    'uptimeKumaCachebuster',
-  ]),
+export const MONITOR_TYPE_FIELDS: Record<MonitorType, Set<string>> = {
+  http: mergeFields(COMMON_FIELDS, URL_BASED_FIELDS, ['keyword', 'invertKeyword', 'cacheBust']),
   'json-query': mergeFields(COMMON_FIELDS, URL_BASED_FIELDS, [
     'jsonPath',
     'jsonPathOperator',
@@ -53,7 +48,7 @@ const MONITOR_TYPE_FIELDS: Record<MonitorType, Set<string>> = {
   keyword: mergeFields(COMMON_FIELDS, URL_BASED_FIELDS, ['keyword', 'invertKeyword']),
   'grpc-keyword': mergeFields(COMMON_FIELDS, [
     'url',
-    'requestTimeout',
+    'timeout',
     'keyword',
     'invertKeyword',
     'upsideDown',
@@ -63,9 +58,9 @@ const MONITOR_TYPE_FIELDS: Record<MonitorType, Set<string>> = {
     'hostname',
     'upsideDown',
     'packetSize',
-    'maxPackets',
-    'numericOutput',
-    'perPingTimeout',
+    'ping_count',
+    'ping_numeric',
+    'ping_per_request_timeout',
   ]),
   dns: mergeFields(COMMON_FIELDS, [
     'hostname',

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
-import { type AddMonitorInput, env, UptimeKumaClient } from '../src/api/index.js'
+import { AddMonitorInputSchema, env, UptimeKumaClient } from '../src/api/index.js'
 import { cleanupAllMonitors, waitForUptimeKuma } from './helpers.js'
 
 describe('Uptime Kuma Integration Tests', () => {
@@ -70,7 +70,7 @@ describe('Uptime Kuma Integration Tests', () => {
       active: true,
     }
 
-    const result = await client.addMonitor(monitor as AddMonitorInput)
+    const result = await client.addMonitor(AddMonitorInputSchema.parse(monitor))
 
     expect(result).toBeDefined()
     expect(result.id).toBeGreaterThan(0)
@@ -93,7 +93,7 @@ describe('Uptime Kuma Integration Tests', () => {
       active: true,
     }
 
-    const result = await client.addMonitor(monitor as AddMonitorInput)
+    const result = await client.addMonitor(AddMonitorInputSchema.parse(monitor))
 
     expect(result).toBeDefined()
     expect(result.id).toBeGreaterThan(0)
@@ -117,7 +117,7 @@ describe('Uptime Kuma Integration Tests', () => {
       active: true,
     }
 
-    const result = await client.addMonitor(monitor as AddMonitorInput)
+    const result = await client.addMonitor(AddMonitorInputSchema.parse(monitor))
 
     expect(result).toBeDefined()
     expect(result.id).toBeGreaterThan(0)

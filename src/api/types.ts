@@ -3,6 +3,7 @@ import type { MonitorConfig } from './schemas.js'
 
 export interface Monitor extends MonitorConfig {
   id: number
+  pathName?: string
 }
 
 export interface LoginResponse {

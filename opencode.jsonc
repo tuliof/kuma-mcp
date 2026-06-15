@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "kuma-mcp": {
+      "type": "local",
+      "enabled": true,
+      "command": ["bun", "run", "dev"],
+      "environment": {
+        "UPTIME_KUMA_URL": "http://localhost:3001",
+        "UPTIME_KUMA_USERNAME": "admin",
+        "UPTIME_KUMA_PASSWORD": "admin123"
+      }
+    },
+    "Bun": {
+      "type": "remote",
+      "url": "https://bun.com/docs/mcp"
+    }
+  }
+}

@@ -87,7 +87,7 @@ export const MonitorConfigSchema = z
       .default({})
       .describe('Object mapping notification IDs to their settings'),
     active: z.boolean().default(true).describe('Whether the monitor is active (default: true)'),
-    requestTimeout: z.number().default(48).describe('Request timeout in seconds (default: 48)'),
+    timeout: z.number().default(48).describe('Request timeout in seconds (default: 48)'),
     method: z.string().optional().describe('HTTP method (GET, POST, etc.)'),
     headers: z.string().optional().describe('HTTP headers as JSON string'),
     body: z.string().optional().describe('HTTP request body'),
@@ -113,12 +113,10 @@ export const MonitorConfigSchema = z
       .default(false)
       .describe('Certificate Expiry Notification - Send notification when TLS certificate expires'),
     ignoreTls: z.boolean().default(false).describe('Ignore TLS/SSL errors for HTTPS websites'),
-    uptimeKumaCachebuster: z
+    cacheBust: z
       .boolean()
       .default(false)
-      .describe(
-        'Add the uptime_kuma_cachebuster parameter - Randomly generated parameter to skip caches',
-      ),
+      .describe('Add a random query parameter to bypass caching (also known as cache busting)'),
     maxredirects: z
       .number()
       .default(10)
@@ -141,27 +139,26 @@ export const MonitorConfigSchema = z
     dns_resolve_type: z.string().optional().describe('DNS record type to query'),
     description: z.string().optional().describe('Monitor description'),
     parent: z.number().optional().describe('Parent monitor ID (for grouping)'),
-    pathName: z.string().optional().describe('Path name for the monitor'),
     // Ping monitor advanced fields
     packetSize: z
       .number()
       .default(56)
       .describe('Packet Size - Number of data bytes to be sent (default: 56)'),
-    maxPackets: z
+    ping_count: z
       .number()
       .default(1)
-      .describe('Max Packets - Number of packets to send before stopping (default: 1)'),
-    numericOutput: z
+      .describe('Number of ping packets to send before stopping (default: 1)'),
+    ping_numeric: z
       .boolean()
-      .default(false)
+      .default(true)
       .describe(
-        'Numeric Output - If checked, IP addresses will be output instead of symbolic hostnames',
+        'If checked, IP addresses will be output instead of symbolic hostnames (default: true)',
       ),
-    perPingTimeout: z
+    ping_per_request_timeout: z
       .number()
       .default(2)
       .describe(
-        'Per-Ping Timeout - This is the maximum waiting time (in seconds) before considering a single ping packet lost',
+        'Maximum waiting time in seconds before considering a single ping packet lost (default: 2)',
       ),
   })
   .superRefine((data, ctx) => {

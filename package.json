@@ -1,6 +1,6 @@
 {
   "name": "kuma-mcp",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A MCP server for uptime-kuma v2",
   "type": "module",
   "main": "dist/index.js",
@@ -16,7 +16,7 @@
     "kuma:start": "docker compose up -d && bun run setup-kuma",
     "kuma:stop": "docker compose down --volumes",
     "preinspect": "bun run kuma:start",
-    "inspect": "bunx @modelcontextprotocol/inspector bun run dev",
+    "inspect": "bunx @modelcontextprotocol/inspector --config mcp.json --server kuma",
     "full-check": "biome check . && bun run build && bun run test:unit && bun run test:integration",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
