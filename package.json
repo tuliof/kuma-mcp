@@ -4,8 +4,25 @@
   "description": "A MCP server for uptime-kuma v2",
   "type": "module",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "kuma-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tuliof/kuma-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tuliof/kuma-mcp/issues"
+  },
+  "homepage": "https://github.com/tuliof/kuma-mcp#readme",
+  "engines": {
+    "node": ">=18"
   },
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node --format esm && bun run tsc --emitDeclarationOnly",
@@ -21,6 +38,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
+    "prepublishOnly": "bun run build",
     "prepare": "husky"
   },
   "keywords": [
