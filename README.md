@@ -1,133 +1,59 @@
 # kuma-mcp
 
-A Model Context Protocol (MCP) server for Uptime Kuma v2 🐻🤖
-
-This MCP server enables AI assistants to interact with Uptime Kuma, allowing them to manage monitoring services, add/update/remove monitors, and control monitor states.
-
-## Features
-
-- 🔐 **Authentication**: Support for both username/password and API key authentication
-- 📊 **Monitor Management**: Add, update, and remove monitors
-- ⏯️ **Monitor Control**: Pause and resume monitors
-- 📋 **Monitor Information**: Get details of specific monitors or list all monitors
-- 🐳 **Docker Support**: Includes docker-compose.yml for easy Uptime Kuma deployment
-- 🏗️ **TypeScript**: Fully typed with Zod schema validation
-- ⚡ **Built with Bun**: Fast runtime and package manager (requires Node.js v18+ LTS)
-
-## Installation
-
-### Prerequisites
-
-- [Bun](https://bun.sh) installed on your system
-- Node.js v18+ LTS
-- An Uptime Kuma v2 instance (can be started with included docker-compose.yml)
-
-### Install Dependencies
-
-```bash
-bun install
-```
-
-### Build
-
-```bash
-bun run build
-```
+A Model Context Protocol (MCP) server for [Uptime Kuma v2](https://github.com/louislam/uptime-kuma). Enables AI assistants to manage monitoring services — add, update, pause, resume, and remove monitors, check statuses, and inspect heartbeats.
 
 ## Quick Start
 
-### 1. Start Uptime Kuma (Optional)
-
-If you don't have an Uptime Kuma instance running, use the included docker-compose:
-
 ```bash
-docker-compose up -d
+# Install globally
+npm install -g kuma-mcp
+
+# Or run directly
+npx kuma-mcp
 ```
 
-Uptime Kuma will be available at `http://localhost:3001`. Go to the URL and finish the uptime-kuma configuration.
+Requires a running Uptime Kuma v2 instance and credentials.
 
-### 2. Configure Environment Variables
+## Prerequisites
 
-Set the credentials in `.env`:
+- [Bun](https://bun.sh) or Node.js 18+ (for `npx`)
+- An Uptime Kuma v2 instance (see [docker-compose.yml](docker-compose.yml) for local setup)
 
-```bash
-cp .env.example .env
-```
+## Configuration
 
-### 3. Run the Server
+Set these environment variables:
 
-```bash
-bun run dev
-```
+| Variable | Required | Description |
+|---|---|---|
+| `UPTIME_KUMA_URL` | Yes | URL of your Uptime Kuma instance (e.g. `http://localhost:3001`) |
+| `UPTIME_KUMA_USERNAME` | With password | Username for authentication |
+| `UPTIME_KUMA_PASSWORD` | With username | Password for authentication |
+| `UPTIME_KUMA_API_KEY` | Alternative | API key instead of username/password |
 
-Or use the built version:
+Create a `.env` file (copied from `.env.example`) or pass them directly in your MCP client config.
 
-```bash
-bun run build
-bun dist/index.js
-```
+## Usage
 
-## Testing with MCP Inspector
-
-The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is a visual tool for testing and debugging MCP servers. It provides an interactive interface to explore your server's capabilities, test tools, and inspect responses.
-
-### Run with Inspector
-
-Start your MCP server with the Inspector:
+### As a CLI
 
 ```bash
-bunx @modelcontextprotocol/inspector bun run dev
+kuma-mcp
 ```
 
-or the built version
+Starts the MCP server over stdio. Integrate with any MCP-compatible client.
 
-```bash
-bun run build
-bunx @modelcontextprotocol/inspector bun run dist/index.js
-```
+### MCP Client Integration
 
-The Inspector will:
+Add to your MCP client configuration:
 
-1. Start your MCP server
-2. Open a web interface (typically at `http://localhost:6274`)
-3. Allow you to interactively test all available tools
-4. Display real-time request/response data
-5. Help debug issues with your server
+**Claude Desktop** (`claude_desktop_config.json`):
 
-### Using the Inspector
-
-Once the Inspector is running:
-
-1. **Connect to Server**: The Inspector automatically connects to your MCP server
-2. **Browse Tools**: View all available tools (`add_monitor`, `list_monitors`, etc)
-3. **Test Tools**: Fill in parameters and execute tools to see responses
-4. **Inspect Results**: View detailed request/response JSON
-5. **Debug Issues**: Check for errors and validation problems
-
-This is especially useful for:
-
-- Testing monitor creation with different configurations
-- Verifying authentication is working correctly
-- Exploring the response format of each tool
-- Debugging issues before integrating with Claude Desktop or other MCP clients
-
-## MCP Configuration
-
-To use this server with an MCP client, add it to your client's MCP configuration using the built `dist/index.js` entry point.
-
-> [!NOTE]
-> Environment variables can be passed from `.env` or set directly in the MCP client config (preferred for tools like GitHub Copilot that don't load `.env` natively).
-
-### GitHub Copilot Configuration
-
-In your GitHub Copilot settings, edit `~/.github/copilot.json` (or the VS Code equivalent):
-
-```jsonc
+```json
 {
   "mcpServers": {
     "kuma-mcp": {
-      "command": "node",
-      "args": ["/path/to/kuma-mcp/dist/index.js"],
+      "command": "npx",
+      "args": ["kuma-mcp"],
       "env": {
         "UPTIME_KUMA_URL": "http://localhost:3001",
         "UPTIME_KUMA_USERNAME": "your-username",
@@ -138,39 +64,33 @@ In your GitHub Copilot settings, edit `~/.github/copilot.json` (or the VS Code e
 }
 ```
 
-### Claude Desktop Configuration
+**GitHub Copilot** (`~/.github/copilot.json`):
 
-Add to your `claude_desktop_config.json`:
-
-```jsonc
+```json
 {
   "mcpServers": {
     "kuma-mcp": {
-      "command": "node",
-      "args": ["/path/to/kuma-mcp/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "kuma-mcp"],
       "env": {
         "UPTIME_KUMA_URL": "http://localhost:3001",
         "UPTIME_KUMA_USERNAME": "your-username",
-        "UPTIME_KUMA_PASSWORD": "your-password",
-        // Alternative: Use API key instead of username/password
-        // "UPTIME_KUMA_API_KEY": "your-api-key"
+        "UPTIME_KUMA_PASSWORD": "your-password"
       }
     }
   }
 }
 ```
 
-### OpenCode Configuration
+**OpenCode** (`.opencode.json`):
 
-Add to your project's `.opencode.json` or global config:
-
-```jsonc
+```json
 {
   "mcp": {
     "kuma-mcp": {
       "type": "command",
-      "command": "bun",
-      "args": ["run", "dev"],
+      "command": "bunx",
+      "args": ["kuma-mcp"],
       "env": {
         "UPTIME_KUMA_URL": "http://localhost:3001",
         "UPTIME_KUMA_USERNAME": "admin",
@@ -184,43 +104,41 @@ Add to your project's `.opencode.json` or global config:
 ## Available Tools
 
 | Tool | Description |
-|------|-------------|
+|---|---|
 | `add_monitor` | Add a new monitor |
 | `update_monitor_by_id` | Update an existing monitor by ID |
-| `remove_monitor_by_id` | Remove a monitor by ID |
-| `pause_monitor_by_id` | Pause a monitor by ID |
-| `resume_monitor_by_id` | Resume a paused monitor by ID |
-| `get_monitor_by_id` | Get monitor details by ID |
+| `remove_monitors` | Remove monitors by IDs |
+| `pause_monitors` | Pause monitors by IDs |
+| `resume_monitors` | Resume monitors by IDs |
+| `get_monitors` | Get details of specific monitors by IDs |
 | `find_monitors_by_name` | Find monitors by name (supports regex) |
 | `list_monitors` | List all monitors |
-| `pause_monitors_by_name` | Pause all monitors matching a name pattern |
-| `resume_monitors_by_name` | Resume all monitors matching a name pattern |
 | `bulk_update_monitors` | Update multiple monitors at once |
 | `get_monitor_status` | Get current status of a monitor |
 | `get_monitors_by_status` | Find monitors by status (up/down/paused/...) |
 | `get_monitor_heartbeats_by_id` | Get raw heartbeat records |
 | `get_monitor_summary_by_id` | Get aggregated 24h health summary |
 
+## Example Workflow
 
-## API Reference
+```
+1. find_monitors_by_name("api")  →  [{id: 3, name: "API Prod"}, {id: 7, name: "API Staging"}]
+2. get_monitors({ids: [3, 7]})   →  detailed info for both
+3. pause_monitors({ids: [7]})    →  pause staging during maintenance
+4. get_monitor_summary_by_id({id: 3})  →  24h uptime report for production
+```
 
-For more information about the Uptime Kuma API, see:
+## Development
 
-- [Uptime Kuma API Documentation](https://github.com/louislam/uptime-kuma/wiki/API-Documentation)
-- [uptime-kuma-api - A Python wrapper for the Uptime Kuma Socket.IO API](https://github.com/lucasheld/uptime-kuma-api)
+```bash
+git clone https://github.com/tuliof/kuma-mcp.git
+cd kuma-mcp
+bun install
+bun run dev
+```
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-This project uses [Semantic Commit Messages](https://www.conventionalcommits.org/). See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
 
 MIT
-
-## References
-
-- [Model Context Protocol](https://modelcontextprotocol.io/)
-- [Uptime Kuma](https://github.com/louislam/uptime-kuma)
-- [Uptime Kuma API Documentation](https://github.com/louislam/uptime-kuma/wiki/API-Documentation)

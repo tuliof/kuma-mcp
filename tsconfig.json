@@ -25,6 +25,7 @@
     "noUnusedParameters": true,
     "noPropertyAccessFromIndexSignature": true,
 
+    "rootDir": "./src",
     "outDir": "./dist",
     "checkJs": false,
     "esModuleInterop": true,
@@ -34,6 +35,6 @@
     "sourceMap": true,
     "types": ["node"]
   },
-  "include": ["src/**/*", "tests/helpers.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
