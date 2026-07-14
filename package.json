@@ -25,7 +25,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --target node --format esm && bun run tsc --emitDeclarationOnly",
+    "build": "bun build src/index.ts --outdir dist --target node --format esm && bun run tsc --emitDeclarationOnly --noEmit false",
     "dev": "bun run src/index.ts",
     "test:unit": "bun test tests/unit/ --reporter=dots",
     "test:integration": "AGENT=1 ./scripts/test-with-docker.sh",
