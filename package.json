@@ -1,6 +1,6 @@
 {
   "name": "kuma-mcp",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A MCP server for uptime-kuma v2",
   "type": "module",
   "main": "dist/index.js",
