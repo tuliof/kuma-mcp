@@ -29,7 +29,14 @@ jobs:
         run: bun run build
 
       - name: Unit tests
-        run: bun run test:unit
+        run: bun run test:unit:ci
 
       - name: Integration tests
-        run: bun run test:integration
+        run: bun run test:integration:ci
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results-*.xml

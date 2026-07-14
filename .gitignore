@@ -30,3 +30,4 @@ coverage/
 .nyc_output/
 .playwright-mcp/
 test-results.xml
+test-results-*.xml

@@ -27,8 +27,10 @@
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node --format esm && bun run tsc --emitDeclarationOnly --noEmit false",
     "dev": "bun run src/index.ts",
-    "test:unit": "bun test tests/unit/ --reporter=dots",
-    "test:integration": "bun test tests/integration.test.ts --reporter=dots",
+    "test:unit": "bun test tests/unit/",
+    "test:integration": "bun test tests/integration.test.ts",
+    "test:unit:ci": "bun test tests/unit/ --reporter=junit --reporter-outfile=test-results-unit.xml",
+    "test:integration:ci": "bun test tests/integration.test.ts --reporter=junit --reporter-outfile=test-results-integration.xml",
     "setup-kuma": "bun run scripts/setup-kuma-credentials.ts",
     "kuma:start": "docker compose up -d && bun run setup-kuma",
     "kuma:stop": "docker compose down --volumes",
