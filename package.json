@@ -49,40 +49,9 @@
   ],
   "author": "Tulio Fernandes",
   "license": "MIT",
-  "release": {
-    "branches": [
-      "main"
-    ],
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      [
-        "@semantic-release/changelog",
-        {
-          "changelogFile": "CHANGELOG.md"
-        }
-      ],
-      [
-        "@semantic-release/npm",
-        {
-          "npmPublish": false
-        }
-      ],
-      [
-        "@semantic-release/git",
-        {
-          "assets": [
-            "CHANGELOG.md",
-            "package.json"
-          ],
-          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-        }
-      ],
-      "@semantic-release/github"
-    ]
-  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.21.0",
+    "@t3-oss/env-core": "^0.13.0",
     "socket.io-client": "^4.8.1",
     "zod": "^4.1.12"
   },
