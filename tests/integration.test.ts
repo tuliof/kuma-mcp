@@ -1,57 +1,67 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
-import { AddMonitorInputSchema, env, UptimeKumaClient } from '../src/api/index.js'
-import { cleanupAllMonitors, waitForUptimeKuma } from './helpers.js'
+import { GenericContainer, type StartedTestContainer, Wait } from 'testcontainers'
+import { AddMonitorInputSchema, UptimeKumaClient } from '../src/api/index.js'
+import { cleanupAllMonitors, setupUptimeKuma, waitForUptimeKuma } from './helpers.js'
+
+const KUMA_IMAGE = 'louislam/uptime-kuma:2'
+const KUMA_USERNAME = 'admin'
+const KUMA_PASSWORD = 'admin123'
 
 describe('Uptime Kuma Integration Tests', () => {
+  let container: StartedTestContainer
   let client: UptimeKumaClient
   const testMonitorIds: number[] = []
 
   beforeAll(async () => {
-    console.log('Connecting to Uptime Kuma at', env.UPTIME_KUMA_URL)
+    container = await new GenericContainer(KUMA_IMAGE)
+      .withExposedPorts(3001)
+      .withTmpFs({ '/app/data': 'rw,size=200m' })
+      .withEnvironment({
+        UPTIME_KUMA_DB_TYPE: 'sqlite',
+        UPTIME_KUMA_DB_NAME: 'kuma',
+        UPTIME_KUMA_DB_USERNAME: 'kuma',
+        UPTIME_KUMA_DB_PASSWORD: 'kuma',
+      })
+      .withWaitStrategy(Wait.forHttp('/setup', 3001).forStatusCode(200))
+      .withStartupTimeout(60_000)
+      .start()
 
-    // Wait for Uptime Kuma to be ready (in case it just started)
-    await waitForUptimeKuma(env.UPTIME_KUMA_URL, 3000)
-    await cleanupAllMonitors(
-      env.UPTIME_KUMA_URL,
-      env.UPTIME_KUMA_USERNAME,
-      env.UPTIME_KUMA_PASSWORD,
-    )
+    const url = `http://localhost:${container.getMappedPort(3001)}`
+    console.log(`Started Uptime Kuma at ${url}`)
 
-    // Initialize client
+    await waitForUptimeKuma(url, 30_000)
+    await setupUptimeKuma(url, KUMA_USERNAME, KUMA_PASSWORD)
+    await cleanupAllMonitors(url, KUMA_USERNAME, KUMA_PASSWORD)
+
     client = new UptimeKumaClient({
-      url: env.UPTIME_KUMA_URL,
-      username: env.UPTIME_KUMA_USERNAME,
-      password: env.UPTIME_KUMA_PASSWORD,
-      apiKey: env.UPTIME_KUMA_API_KEY,
+      url,
+      username: KUMA_USERNAME,
+      password: KUMA_PASSWORD,
     })
     await client.connect()
     await client.authenticate()
 
     console.log('✓ Connected and authenticated successfully')
-  })
+  }, 90_000)
 
   afterAll(async () => {
-    // Only cleanup if client was initialized
-    if (!client) {
-      console.log('⚠️  Client was never initialized, skipping cleanup')
-      return
-    }
-
-    // Clean up test monitors
-    if (testMonitorIds.length > 0) {
+    if (client) {
+      if (testMonitorIds.length > 0) {
+        try {
+          await client.removeMonitors(testMonitorIds)
+        } catch (error) {
+          console.error('Failed to clean up monitors:', error)
+        }
+      }
       try {
-        await client.removeMonitors(testMonitorIds)
+        await client.disconnect()
       } catch (error) {
-        console.error(`Failed to clean up monitors:`, error)
+        console.error('Failed to disconnect client:', error)
       }
     }
-
-    // Disconnect client
-    try {
-      await client.disconnect()
-      console.log('✓ Cleaned up and disconnected')
-    } catch (error) {
-      console.error('Failed to disconnect client:', error)
+    if (container) {
+      await container.stop()
+      console.log('✓ Container stopped')
     }
   })
 
