@@ -9,7 +9,6 @@ describe('env.ts validation', () => {
     process.env.UPTIME_KUMA_URL = ORIGINAL_ENV.UPTIME_KUMA_URL
     process.env.UPTIME_KUMA_USERNAME = ORIGINAL_ENV.UPTIME_KUMA_USERNAME
     process.env.UPTIME_KUMA_PASSWORD = ORIGINAL_ENV.UPTIME_KUMA_PASSWORD
-    process.env.UPTIME_KUMA_API_KEY = ORIGINAL_ENV.UPTIME_KUMA_API_KEY
   })
 
   test('no credentials with invalid URL throws descriptive error', async () => {
@@ -18,11 +17,10 @@ describe('env.ts validation', () => {
     // Clear credential env vars
     delete process.env.UPTIME_KUMA_USERNAME
     delete process.env.UPTIME_KUMA_PASSWORD
-    delete process.env.UPTIME_KUMA_API_KEY
 
     // Dynamic import with cache busting to force re-evaluation
     await expect(import('../../src/api/env.ts?no-creds')).rejects.toThrow(
-      'Either UPTIME_KUMA_USERNAME and UPTIME_KUMA_PASSWORD must be set, or UPTIME_KUMA_API_KEY must be set',
+      'UPTIME_KUMA_USERNAME and UPTIME_KUMA_PASSWORD must be set',
     )
   })
 
@@ -32,7 +30,6 @@ describe('env.ts validation', () => {
     // Set credentials so onValidationError does NOT throw custom error
     process.env.UPTIME_KUMA_USERNAME = 'admin'
     process.env.UPTIME_KUMA_PASSWORD = 'admin123'
-    delete process.env.UPTIME_KUMA_API_KEY
 
     let thrown: unknown
     try {
@@ -49,31 +46,11 @@ describe('env.ts validation', () => {
     }
   })
 
-  test('apiKey present with invalid URL throws original error, not custom one', async () => {
-    process.env.UPTIME_KUMA_URL = 'not-a-valid-url'
-    delete process.env.UPTIME_KUMA_USERNAME
-    delete process.env.UPTIME_KUMA_PASSWORD
-    process.env.UPTIME_KUMA_API_KEY = 'test-api-key'
-
-    let thrown: unknown
-    try {
-      await import('../../src/api/env.ts?api-key-creds')
-    } catch (err) {
-      thrown = err
-    }
-
-    expect(thrown).toBeDefined()
-    if (thrown instanceof Error) {
-      expect(thrown.message).not.toContain('UPTIME_KUMA_USERNAME')
-    }
-  })
-
   test('valid config loads without throwing', async () => {
     // Reset all env vars to valid values
     process.env.UPTIME_KUMA_URL = 'http://localhost:3001'
     process.env.UPTIME_KUMA_USERNAME = 'admin'
     process.env.UPTIME_KUMA_PASSWORD = 'admin123'
-    delete process.env.UPTIME_KUMA_API_KEY
 
     // With valid URL and credentials, this should load without error
     const mod = await import('../../src/api/env.ts?valid-config')

@@ -2,9 +2,8 @@ import { z } from 'zod'
 
 export const AuthConfigSchema = z.object({
   url: z.url(),
-  username: z.string().optional(),
-  password: z.string().optional(),
-  apiKey: z.string().optional(),
+  username: z.string(),
+  password: z.string(),
 })
 
 export type AuthConfig = z.infer<typeof AuthConfigSchema>

@@ -130,7 +130,7 @@ export class UptimeKumaMCPServer {
       try {
         if (!this.client) {
           throw new Error(
-            'Client not initialized. Please set environment variables: UPTIME_KUMA_URL and either (UPTIME_KUMA_USERNAME + UPTIME_KUMA_PASSWORD) or UPTIME_KUMA_API_KEY',
+            'Client not initialized. Please set environment variables: UPTIME_KUMA_URL, UPTIME_KUMA_USERNAME, and UPTIME_KUMA_PASSWORD',
           )
         }
 

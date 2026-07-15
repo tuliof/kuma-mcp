@@ -15,7 +15,6 @@ async function main() {
         url: env.UPTIME_KUMA_URL,
         username: env.UPTIME_KUMA_USERNAME,
         password: env.UPTIME_KUMA_PASSWORD,
-        apiKey: env.UPTIME_KUMA_API_KEY,
       })
     } catch (error) {
       console.error('Warning: Failed to initialize Uptime Kuma client:', error)

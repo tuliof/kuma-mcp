@@ -210,26 +210,27 @@ describe('AuthConfigSchema', () => {
     expect(result.error?.issues[0]?.path).toContain('url')
   })
 
-  test('accepts URL with no optional credentials', () => {
+  test('rejects missing username', () => {
     const result = AuthConfigSchema.safeParse({
       url: 'https://kuma.example.com',
+      password: 'secret',
     })
-    expect(result.success).toBe(true)
+    expect(result.success).toBe(false)
   })
 
-  test('accepts username+password', () => {
+  test('rejects missing password', () => {
+    const result = AuthConfigSchema.safeParse({
+      url: 'https://kuma.example.com',
+      username: 'admin',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  test('accepts url with username and password', () => {
     const result = AuthConfigSchema.safeParse({
       url: 'https://kuma.example.com',
       username: 'admin',
       password: 'secret',
-    })
-    expect(result.success).toBe(true)
-  })
-
-  test('accepts apiKey', () => {
-    const result = AuthConfigSchema.safeParse({
-      url: 'https://kuma.example.com',
-      apiKey: 'abc-123',
     })
     expect(result.success).toBe(true)
   })

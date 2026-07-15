@@ -71,36 +71,21 @@ export class UptimeKumaClient {
         return
       }
 
-      if (this.config.apiKey) {
-        // Authenticate with API key
-        this.socket.emit('loginByToken', this.config.apiKey, (response: LoginResponse) => {
+      this.socket.emit(
+        'login',
+        {
+          username: this.config.username,
+          password: this.config.password,
+        },
+        (response: LoginResponse) => {
           if (!response.ok) {
             reject(`Authentication failed: ${response.msg || 'Unknown error'}`)
             return
           }
           this.authenticated = true
           resolve()
-        })
-      } else if (this.config.username && this.config.password) {
-        // Authenticate with username/password
-        this.socket.emit(
-          'login',
-          {
-            username: this.config.username,
-            password: this.config.password,
-          },
-          (response: LoginResponse) => {
-            if (!response.ok) {
-              reject(`Authentication failed: ${response.msg || 'Unknown error'}`)
-              return
-            }
-            this.authenticated = true
-            resolve()
-          },
-        )
-      } else {
-        reject('No authentication credentials provided')
-      }
+        },
+      )
     })
   }
 
