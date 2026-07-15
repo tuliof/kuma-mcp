@@ -19,7 +19,7 @@ npm-debug.log*
 *.swo
 
 #
-.opencode/agent-notes/
+.opencode/
 
 # OS
 .DS_Store

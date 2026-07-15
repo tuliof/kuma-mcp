@@ -44,9 +44,8 @@ Starts the MCP server over stdio. Integrate with any MCP-compatible client.
 
 ### MCP Client Integration
 
-Add to your MCP client configuration:
-
-**Claude Desktop** (`claude_desktop_config.json`):
+<details>
+<summary><b>Claude Desktop</b> (<code>claude_desktop_config.json</code>)</summary>
 
 ```json
 {
@@ -63,8 +62,10 @@ Add to your MCP client configuration:
   }
 }
 ```
+</details>
 
-**GitHub Copilot** (`~/.github/copilot.json`):
+<details>
+<summary><b>GitHub Copilot</b> (<code>~/.github/copilot.json</code>)</summary>
 
 ```json
 {
@@ -81,8 +82,10 @@ Add to your MCP client configuration:
   }
 }
 ```
+</details>
 
-**OpenCode** (`.opencode.json`):
+<details>
+<summary><b>OpenCode</b> (<code>.opencode.json</code>)</summary>
 
 ```json
 {
@@ -100,6 +103,7 @@ Add to your MCP client configuration:
   }
 }
 ```
+</details>
 
 ## Available Tools
 
@@ -118,22 +122,39 @@ Add to your MCP client configuration:
 | `get_monitors_by_status` | Find monitors by status (up/down/paused/...) |
 | `get_monitor_heartbeats_by_id` | Get raw heartbeat records |
 | `get_monitor_summary_by_id` | Get aggregated 24h health summary |
+| `get_tags` | List all tag definitions |
+| `add_tag` | Create a new tag |
+| `edit_tag` | Update an existing tag |
+| `delete_tag` | Delete a tag (removes from all monitors) |
+| `add_monitor_tag` | Attach a tag to a monitor |
+| `edit_monitor_tag` | Update a tag-monitor association value |
+| `delete_monitor_tag` | Remove a tag from a monitor |
 
 ## Example Prompts
 
-"Show me all monitors that are currently down"
+Try these natural language prompts with an MCP-compatible AI assistant:
 
-"Add an HTTP monitor for https://api.example.com/health that checks every 60 seconds and name it 'API Health'"
+- "Show me all monitors that are currently down"
+- "Add an HTTP monitor for https://api.example.com/health that checks every 60 seconds and name it 'API Health'"
+- "Why did the 'API Prod' monitor go down last night? Look at the last 24 hours of heartbeats"
+- "We're doing maintenance tonight — pause the 'API Staging' monitor and all monitors matching 'staging-*'"
+- "Give me a 24-hour uptime summary for the 'API Prod' monitor"
+- "Remove the old 'api-test-v2' monitor, it's been replaced"
+- "Rename 'API Prod' to 'API Production' and increase its check interval to 120 seconds"
+- "Tag the 'API Prod' monitor as 'production' with a green tag"
+- "Show me all monitors tagged with 'production'"
 
-"Why did the 'API Prod' monitor go down last night? Look at the last 24 hours of heartbeats"
+## Agent Setup Prompt
 
-"We're doing maintenance tonight — pause the 'API Staging' monitor and all monitors matching 'staging-*'"
+If you use AI coding agents (OpenCode, Cursor, Windsurf, etc.), paste this prompt into your agent instructions or rules file to have it set up kuma-mcp automatically:
 
-"Give me a 24-hour uptime summary for the 'API Prod' monitor"
-
-"Remove the old 'api-test-v2' monitor, it's been replaced"
-
-"Rename 'API Prod' to 'API Production' and increase its check interval to 120 seconds"
+> You have access to a kuma-mcp MCP server that manages an Uptime Kuma monitoring instance. You can create, update, pause, resume, and remove monitors, check their status and heartbeats, and manage tags.
+>
+> **Monitor lookup pattern**: Always use `find_monitors_by_name` to resolve names to IDs before calling action tools. For example, to pause "API Prod": first call `find_monitors_by_name("API Prod")`, then `pause_monitors({ids: [result.id]})`.
+>
+> **Available tools**: add_monitor, update_monitor_by_id, remove_monitors, pause_monitors, resume_monitors, get_monitors, find_monitors_by_name, list_monitors, bulk_update_monitors, get_monitor_status, get_monitors_by_status, get_monitor_heartbeats_by_id, get_monitor_summary_by_id, get_tags, add_tag, edit_tag, delete_tag, add_monitor_tag, edit_monitor_tag, delete_monitor_tag.
+>
+> **Environment**: The server connects via `UPTIME_KUMA_URL`, `UPTIME_KUMA_USERNAME`, and `UPTIME_KUMA_PASSWORD`.
 
 ## Development
 
