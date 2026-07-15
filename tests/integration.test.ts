@@ -563,4 +563,85 @@ describe('Uptime Kuma Integration Tests', () => {
       }
     })
   })
+
+  describe('Tag Management', () => {
+    const tagIds: number[] = []
+
+    afterAll(async () => {
+      for (const tagId of tagIds) {
+        try {
+          await client.deleteTag({ id: tagId })
+        } catch {
+          // ignore
+        }
+      }
+    })
+
+    test('should add a tag', async () => {
+      const tag = await client.addTag({ name: 'test-tag', color: '#059669' })
+
+      expect(tag).toBeDefined()
+      expect(tag.id).toBeGreaterThan(0)
+      expect(tag.name).toBe('test-tag')
+      expect(tag.color).toBe('#059669')
+      tagIds.push(tag.id)
+    })
+
+    test('should get all tags', async () => {
+      const tags = await client.getTags()
+
+      expect(Array.isArray(tags)).toBe(true)
+      expect(tags.length).toBeGreaterThanOrEqual(1)
+      const found = tags.find((t) => t.id === tagIds[0])
+      expect(found).toBeDefined()
+      expect(found?.name).toBe('test-tag')
+    })
+
+    test('should edit a tag', async () => {
+      const tag = await client.editTag({
+        id: tagIds[0],
+        name: 'test-tag-renamed',
+        color: '#ff0000',
+      })
+
+      expect(tag).toBeDefined()
+      expect(tag.id).toBe(tagIds[0])
+      expect(tag.name).toBe('test-tag-renamed')
+      expect(tag.color).toBe('#ff0000')
+    })
+
+    test('should add and remove a monitor tag', async () => {
+      expect(testMonitorIds[0]).toBeDefined()
+      const monitorId = testMonitorIds[0]
+
+      await client.addMonitorTag({ tagId: tagIds[0], monitorId, value: 'env-prod' })
+
+      const monitors = await client.getMonitors([monitorId])
+      const monitor = monitors[0]
+      expect(monitor.tags).toBeDefined()
+      const mt = monitor.tags?.find((t) => t.tag_id === tagIds[0])
+      expect(mt).toBeDefined()
+      expect(mt?.value).toBe('env-prod')
+
+      await client.editMonitorTag({ tagId: tagIds[0], monitorId, value: 'env-staging' })
+      const updated = await client.getMonitors([monitorId])
+      const updatedMt = updated[0].tags?.find((t) => t.tag_id === tagIds[0])
+      expect(updatedMt?.value).toBe('env-staging')
+
+      await client.deleteMonitorTag({ tagId: tagIds[0], monitorId, value: 'env-staging' })
+      const final = await client.getMonitors([monitorId])
+      const removed = final[0].tags?.find((t) => t.tag_id === tagIds[0])
+      expect(removed).toBeUndefined()
+    }, 30_000)
+
+    test('should delete a tag', async () => {
+      await client.deleteTag({ id: tagIds[0] })
+
+      const tags = await client.getTags()
+      const found = tags.find((t) => t.id === tagIds[0])
+      expect(found).toBeUndefined()
+
+      tagIds.shift()
+    })
+  })
 })

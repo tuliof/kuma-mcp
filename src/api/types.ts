@@ -4,6 +4,21 @@ import type { MonitorConfig } from './schemas.js'
 export interface Monitor extends MonitorConfig {
   id: number
   pathName?: string
+  tags?: MonitorTag[]
+}
+
+export interface Tag {
+  id: number
+  name: string
+  color: string
+}
+
+export interface MonitorTag {
+  tag_id: number
+  monitor_id: number
+  value: string | null
+  name: string
+  color: string
 }
 
 export interface LoginResponse {

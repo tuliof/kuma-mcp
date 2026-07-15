@@ -13,10 +13,13 @@ export type {
   MonitorStatusLabel,
   MonitorStatusResult,
   MonitorSummaryResult,
+  MonitorTag,
+  Tag,
 } from './types.js'
 
 // Import monitor operations
 import * as monitors from './monitors.js'
+import * as tags from './tags.js'
 
 /**
  * Client for interacting with Uptime Kuma API via Socket.IO
@@ -171,6 +174,42 @@ export class UptimeKumaClient {
     return monitors.getMonitorSummaryById(this.getContext(), id)
   }
 
+  // Tag operations
+  async getTags() {
+    await this.ensureAuthenticated()
+    return tags.getTags(this.getContext())
+  }
+
+  async addTag(input: Parameters<typeof tags.addTag>[1]) {
+    await this.ensureAuthenticated()
+    return tags.addTag(this.getContext(), input)
+  }
+
+  async editTag(input: Parameters<typeof tags.editTag>[1]) {
+    await this.ensureAuthenticated()
+    return tags.editTag(this.getContext(), input)
+  }
+
+  async deleteTag(input: Parameters<typeof tags.deleteTag>[1]) {
+    await this.ensureAuthenticated()
+    return tags.deleteTag(this.getContext(), input)
+  }
+
+  async addMonitorTag(input: Parameters<typeof tags.addMonitorTag>[1]) {
+    await this.ensureAuthenticated()
+    return tags.addMonitorTag(this.getContext(), input)
+  }
+
+  async editMonitorTag(input: Parameters<typeof tags.editMonitorTag>[1]) {
+    await this.ensureAuthenticated()
+    return tags.editMonitorTag(this.getContext(), input)
+  }
+
+  async deleteMonitorTag(input: Parameters<typeof tags.deleteMonitorTag>[1]) {
+    await this.ensureAuthenticated()
+    return tags.deleteMonitorTag(this.getContext(), input)
+  }
+
   async disconnect(): Promise<void> {
     if (this.socket) {
       this.socket.disconnect()
@@ -185,9 +224,15 @@ export { env } from './env.js'
 
 export type {
   AddMonitorInput,
+  AddMonitorTagInput,
+  AddTagInput,
   AuthConfig,
   BaseResponse,
   BulkUpdateMonitorsInput,
+  DeleteMonitorTagInput,
+  DeleteTagInput,
+  EditMonitorTagInput,
+  EditTagInput,
   FindMonitorsByNameInput,
   IdsInput,
   ListMonitorsInput,
@@ -199,9 +244,16 @@ export type {
 // Export all schemas and types from schemas.ts
 export {
   AddMonitorInputSchema,
+  AddMonitorTagInputSchema,
+  AddTagInputSchema,
   AuthConfigSchema,
   BaseResponseSchema,
   BulkUpdateMonitorsInputSchema,
+  DeleteMonitorTagInputSchema,
+  DeleteTagInputSchema,
+  EditMonitorTagInputSchema,
+  EditTagInputSchema,
+  EmptyInputSchema,
   FindMonitorsByNameInputSchema,
   GetMonitorHeartbeatsInputSchema,
   GetMonitorStatusInputSchema,

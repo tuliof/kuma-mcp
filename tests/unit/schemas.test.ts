@@ -1,8 +1,14 @@
 import { describe, expect, test } from 'bun:test'
 import { z } from 'zod'
 import {
+  AddMonitorTagInputSchema,
+  AddTagInputSchema,
   AuthConfigSchema,
   BulkUpdateMonitorsInputSchema,
+  DeleteMonitorTagInputSchema,
+  DeleteTagInputSchema,
+  EditMonitorTagInputSchema,
+  EditTagInputSchema,
   FindMonitorsByNameInputSchema,
   GetMonitorHeartbeatsInputSchema,
   GetMonitorStatusInputSchema,
@@ -471,5 +477,129 @@ describe('UpdateMonitorInputSchema', () => {
     // so an empty object for the config part should be valid
     const result = UpdateMonitorInputSchema.safeParse({ id: 1 })
     expect(result.success).toBe(true)
+  })
+})
+
+// ────────────────────────────────────────────────────────────
+// Tag schemas
+// ────────────────────────────────────────────────────────────
+describe('AddTagInputSchema', () => {
+  test('accepts name and color', () => {
+    const result = AddTagInputSchema.safeParse({ name: 'production', color: '#059669' })
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects empty name', () => {
+    const result = AddTagInputSchema.safeParse({ name: '', color: '#059669' })
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects missing color', () => {
+    const result = AddTagInputSchema.safeParse({ name: 'production' })
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('EditTagInputSchema', () => {
+  test('accepts id with name only', () => {
+    const result = EditTagInputSchema.safeParse({ id: 1, name: 'staging' })
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts id with color only', () => {
+    const result = EditTagInputSchema.safeParse({ id: 1, color: '#ff0000' })
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects missing id', () => {
+    const result = EditTagInputSchema.safeParse({ name: 'staging' })
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('DeleteTagInputSchema', () => {
+  test('accepts id', () => {
+    const result = DeleteTagInputSchema.safeParse({ id: 1 })
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects missing id', () => {
+    const result = DeleteTagInputSchema.safeParse({})
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('AddMonitorTagInputSchema', () => {
+  test('accepts tagId, monitorId, and value', () => {
+    const result = AddMonitorTagInputSchema.safeParse({ tagId: 1, monitorId: 2, value: 'env' })
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts tagId and monitorId without value', () => {
+    const result = AddMonitorTagInputSchema.safeParse({ tagId: 1, monitorId: 2 })
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts null value', () => {
+    const result = AddMonitorTagInputSchema.safeParse({ tagId: 1, monitorId: 2, value: null })
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects missing tagId', () => {
+    const result = AddMonitorTagInputSchema.safeParse({ monitorId: 2 })
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects missing monitorId', () => {
+    const result = AddMonitorTagInputSchema.safeParse({ tagId: 1 })
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('EditMonitorTagInputSchema', () => {
+  test('accepts tagId, monitorId, and value', () => {
+    const result = EditMonitorTagInputSchema.safeParse({ tagId: 1, monitorId: 2, value: 'prod' })
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts null value', () => {
+    const result = EditMonitorTagInputSchema.safeParse({ tagId: 1, monitorId: 2, value: null })
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects missing value', () => {
+    const result = EditMonitorTagInputSchema.safeParse({ tagId: 1, monitorId: 2 })
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('DeleteMonitorTagInputSchema', () => {
+  test('accepts tagId, monitorId, and string value', () => {
+    const result = DeleteMonitorTagInputSchema.safeParse({
+      tagId: 1,
+      monitorId: 2,
+      value: 'env-prod',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts tagId, monitorId, and null value', () => {
+    const result = DeleteMonitorTagInputSchema.safeParse({ tagId: 1, monitorId: 2, value: null })
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects missing tagId', () => {
+    const result = DeleteMonitorTagInputSchema.safeParse({ monitorId: 2, value: 'env-prod' })
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects missing monitorId', () => {
+    const result = DeleteMonitorTagInputSchema.safeParse({ tagId: 1, value: 'env-prod' })
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects missing value', () => {
+    const result = DeleteMonitorTagInputSchema.safeParse({ tagId: 1, monitorId: 2 })
+    expect(result.success).toBe(false)
   })
 })

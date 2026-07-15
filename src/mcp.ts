@@ -7,9 +7,16 @@ import {
 } from '@modelcontextprotocol/sdk/types.js'
 import {
   AddMonitorInputSchema,
+  AddMonitorTagInputSchema,
+  AddTagInputSchema,
   type AuthConfig,
   AuthConfigSchema,
   BulkUpdateMonitorsInputSchema,
+  DeleteMonitorTagInputSchema,
+  DeleteTagInputSchema,
+  EditMonitorTagInputSchema,
+  EditTagInputSchema,
+  EmptyInputSchema,
   FindMonitorsByNameInputSchema,
   GetMonitorHeartbeatsInputSchema,
   GetMonitorStatusInputSchema,
@@ -94,6 +101,42 @@ const TOOL_DEFINITIONS: Tool[] = [
     description:
       "Get an aggregated summary of a monitor's health over the last 24 hours. Returns uptime percentage, average ping, total heartbeats, and recent outage count. Use this for a quick health overview.",
     inputSchema: zodSchemaToToolInputSchema(GetMonitorSummaryInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'get_tags',
+    description: 'List all tag definitions in Uptime Kuma. Each tag has an id, name, and color.',
+    inputSchema: zodSchemaToToolInputSchema(EmptyInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'add_tag',
+    description: 'Create a new tag with a name and hex color (e.g., "#059669").',
+    inputSchema: zodSchemaToToolInputSchema(AddTagInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'edit_tag',
+    description: 'Update an existing tag name and/or color by its ID.',
+    inputSchema: zodSchemaToToolInputSchema(EditTagInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'delete_tag',
+    description: 'Delete a tag by its ID. This also removes the tag from all monitors.',
+    inputSchema: zodSchemaToToolInputSchema(DeleteTagInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'add_monitor_tag',
+    description:
+      'Attach a tag to a monitor. An optional value can be set for the tag-monitor association.',
+    inputSchema: zodSchemaToToolInputSchema(AddMonitorTagInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'edit_monitor_tag',
+    description: 'Update the value of an existing tag-monitor association.',
+    inputSchema: zodSchemaToToolInputSchema(EditMonitorTagInputSchema) as Tool['inputSchema'],
+  },
+  {
+    name: 'delete_monitor_tag',
+    description: 'Remove a tag from a monitor.',
+    inputSchema: zodSchemaToToolInputSchema(DeleteMonitorTagInputSchema) as Tool['inputSchema'],
   },
 ]
 
@@ -281,6 +324,88 @@ export class UptimeKumaMCPServer {
             const result = await this.client.getMonitorSummaryById(input.id)
             return {
               content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+            }
+          }
+
+          case 'get_tags': {
+            const result = await this.client.getTags()
+            return {
+              content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+            }
+          }
+
+          case 'add_tag': {
+            const input = AddTagInputSchema.parse(request.params.arguments)
+            const result = await this.client.addTag(input)
+            return {
+              content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+            }
+          }
+
+          case 'edit_tag': {
+            const input = EditTagInputSchema.parse(request.params.arguments)
+            const result = await this.client.editTag(input)
+            return {
+              content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+            }
+          }
+
+          case 'delete_tag': {
+            const input = DeleteTagInputSchema.parse(request.params.arguments)
+            await this.client.deleteTag(input)
+            return {
+              content: [{ type: 'text', text: JSON.stringify({ deleted: true, id: input.id }) }],
+            }
+          }
+
+          case 'add_monitor_tag': {
+            const input = AddMonitorTagInputSchema.parse(request.params.arguments)
+            await this.client.addMonitorTag(input)
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify({
+                    added: true,
+                    tagId: input.tagId,
+                    monitorId: input.monitorId,
+                  }),
+                },
+              ],
+            }
+          }
+
+          case 'edit_monitor_tag': {
+            const input = EditMonitorTagInputSchema.parse(request.params.arguments)
+            await this.client.editMonitorTag(input)
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify({
+                    updated: true,
+                    tagId: input.tagId,
+                    monitorId: input.monitorId,
+                  }),
+                },
+              ],
+            }
+          }
+
+          case 'delete_monitor_tag': {
+            const input = DeleteMonitorTagInputSchema.parse(request.params.arguments)
+            await this.client.deleteMonitorTag(input)
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify({
+                    removed: true,
+                    tagId: input.tagId,
+                    monitorId: input.monitorId,
+                  }),
+                },
+              ],
             }
           }
 

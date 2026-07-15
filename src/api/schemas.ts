@@ -8,7 +8,9 @@ export const AuthConfigSchema = z.object({
 
 export type AuthConfig = z.infer<typeof AuthConfigSchema>
 
-// Monitor type enum matching uptime-kuma types
+// Schema for tools that accept no input
+export const EmptyInputSchema = z.object({})
+
 export const MonitorTypeSchema = z.enum([
   'http',
   'port',
@@ -282,6 +284,56 @@ export type GetMonitorStatusInput = z.infer<typeof GetMonitorStatusInputSchema>
 export type GetMonitorsByStatusInput = z.infer<typeof GetMonitorsByStatusInputSchema>
 export type GetMonitorHeartbeatsInput = z.infer<typeof GetMonitorHeartbeatsInputSchema>
 export type GetMonitorSummaryInput = z.infer<typeof GetMonitorSummaryInputSchema>
+
+// Tag schemas
+export const AddTagInputSchema = z.object({
+  name: z.string().min(1).describe('Name of the tag'),
+  color: z.string().describe('Hex color code for the tag (e.g., "#059669")'),
+})
+
+export const EditTagInputSchema = z.object({
+  id: z.number().describe('ID of the tag to update'),
+  name: z.string().min(1).optional().describe('New name for the tag'),
+  color: z.string().optional().describe('New hex color code (e.g., "#059669")'),
+})
+
+export const DeleteTagInputSchema = z.object({
+  id: z.number().describe('ID of the tag to delete'),
+})
+
+export const AddMonitorTagInputSchema = z.object({
+  tagId: z.number().describe('ID of the tag to attach'),
+  monitorId: z.number().describe('ID of the monitor to tag'),
+  value: z
+    .string()
+    .nullable()
+    .optional()
+    .describe('Optional value for this tag-monitor association'),
+})
+
+export const EditMonitorTagInputSchema = z.object({
+  tagId: z.number().describe('ID of the tag'),
+  monitorId: z.number().describe('ID of the monitor'),
+  value: z.string().nullable().describe('New value for this tag-monitor association'),
+})
+
+export const DeleteMonitorTagInputSchema = z.object({
+  tagId: z.number().describe('ID of the tag to remove'),
+  monitorId: z.number().describe('ID of the monitor to remove the tag from'),
+  value: z
+    .string()
+    .nullable()
+    .describe(
+      'Value of the tag-monitor association to remove (use null if the tag was added without a value)',
+    ),
+})
+
+export type AddTagInput = z.infer<typeof AddTagInputSchema>
+export type EditTagInput = z.infer<typeof EditTagInputSchema>
+export type DeleteTagInput = z.infer<typeof DeleteTagInputSchema>
+export type AddMonitorTagInput = z.infer<typeof AddMonitorTagInputSchema>
+export type EditMonitorTagInput = z.infer<typeof EditMonitorTagInputSchema>
+export type DeleteMonitorTagInput = z.infer<typeof DeleteMonitorTagInputSchema>
 
 // # Output schemas
 
