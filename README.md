@@ -28,9 +28,9 @@ Set these environment variables:
 | `UPTIME_KUMA_URL` | Yes | URL of your Uptime Kuma instance (e.g. `http://localhost:3001`) |
 | `UPTIME_KUMA_USERNAME` | With password | Username for authentication |
 | `UPTIME_KUMA_PASSWORD` | With username | Password for authentication |
-| `UPTIME_KUMA_API_KEY` | Alternative | API key instead of username/password |
-
 Create a `.env` file (copied from `.env.example`) or pass them directly in your MCP client config.
+
+> **Note:** Uptime Kuma API keys are REST-only (used for Prometheus `/metrics` scraping) and cannot be used for monitor management. This server authenticates via username/password over Socket.IO.
 
 ## Usage
 
@@ -119,14 +119,21 @@ Add to your MCP client configuration:
 | `get_monitor_heartbeats_by_id` | Get raw heartbeat records |
 | `get_monitor_summary_by_id` | Get aggregated 24h health summary |
 
-## Example Workflow
+## Example Prompts
 
-```
-1. find_monitors_by_name("api")  →  [{id: 3, name: "API Prod"}, {id: 7, name: "API Staging"}]
-2. get_monitors({ids: [3, 7]})   →  detailed info for both
-3. pause_monitors({ids: [7]})    →  pause staging during maintenance
-4. get_monitor_summary_by_id({id: 3})  →  24h uptime report for production
-```
+"Show me all monitors that are currently down"
+
+"Add an HTTP monitor for https://api.example.com/health that checks every 60 seconds and name it 'API Health'"
+
+"Why did the 'API Prod' monitor go down last night? Look at the last 24 hours of heartbeats"
+
+"We're doing maintenance tonight — pause the 'API Staging' monitor and all monitors matching 'staging-*'"
+
+"Give me a 24-hour uptime summary for the 'API Prod' monitor"
+
+"Remove the old 'api-test-v2' monitor, it's been replaced"
+
+"Rename 'API Prod' to 'API Production' and increase its check interval to 120 seconds"
 
 ## Development
 
