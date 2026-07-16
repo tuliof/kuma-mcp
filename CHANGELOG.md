@@ -1,3 +1,10 @@
+## [0.2.1](https://github.com/tuliof/kuma-mcp/compare/v0.2.0...v0.2.1) (2026-07-16)
+
+
+### Bug Fixes
+
+* use husky install script instead of silently swallowing errors ([032059c](https://github.com/tuliof/kuma-mcp/commit/032059c76d6e389e214d312473ac1e3b9d8c1457))
+
 # [0.2.0](https://github.com/tuliof/kuma-mcp/compare/v0.1.0...v0.2.0) (2026-07-16)
 
 
