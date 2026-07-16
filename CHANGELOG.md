@@ -1,3 +1,16 @@
+# [0.2.0](https://github.com/tuliof/kuma-mcp/compare/v0.1.0...v0.2.0) (2026-07-16)
+
+
+### Bug Fixes
+
+* fail fast with helpful error when env vars are missing ([88f18fd](https://github.com/tuliof/kuma-mcp/commit/88f18fda4e36bdf6aa6bf8d9ad49949dc1251a7c))
+* remove non-functional API key auth, require username/password only ([dc65867](https://github.com/tuliof/kuma-mcp/commit/dc6586782bab10f86b3feb4e57a9507e1a0a3d9c))
+
+
+### Features
+
+* add tag management tools and shared EmptyInputSchema ([fcefd56](https://github.com/tuliof/kuma-mcp/commit/fcefd56dcc69317c580047251685e3dc8735f3cd))
+
 # 0.1.0 (2026-07-14)
 
 
