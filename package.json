@@ -29,8 +29,6 @@
     "dev": "bun run src/index.ts",
     "test:unit": "bun test tests/unit/",
     "test:integration": "bun test tests/integration.test.ts",
-    "test:unit:ci": "bun test tests/unit/ --reporter=junit --reporter-outfile=test-results-unit.xml",
-    "test:integration:ci": "bun test tests/integration.test.ts --reporter=junit --reporter-outfile=test-results-integration.xml",
     "setup-kuma": "bun run scripts/setup-kuma-credentials.ts",
     "kuma:start": "docker compose up -d && bun run setup-kuma",
     "kuma:stop": "docker compose down --volumes",
@@ -41,7 +39,7 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "prepublishOnly": "bun run build",
-    "prepare": "husky || true"
+    "prepare": "node .husky/install.mjs"
   },
   "keywords": [
     "mcp",

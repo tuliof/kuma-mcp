@@ -10,8 +10,6 @@ jobs:
   ci:
     name: lint & build & test
     runs-on: ubuntu-latest
-    env:
-      HUSKY: '0'
     steps:
       - uses: actions/checkout@v5
 
@@ -29,14 +27,7 @@ jobs:
         run: bun run build
 
       - name: Unit tests
-        run: bun run test:unit:ci
+        run: bun run test:unit
 
       - name: Integration tests
-        run: bun run test:integration:ci
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: test-results
-          path: test-results-*.xml
+        run: bun run test:integration
