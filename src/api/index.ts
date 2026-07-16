@@ -219,9 +219,6 @@ export class UptimeKumaClient {
   }
 }
 
-// Export environment configuration
-export { env } from './env.js'
-
 export type {
   AddMonitorInput,
   AddMonitorTagInput,
